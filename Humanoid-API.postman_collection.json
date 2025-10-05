@@ -1,0 +1,1392 @@
+{
+	"info": {
+		"_postman_id": "humanoid-api-collection-2025",
+		"name": "Humanoid API - Complete Collection",
+		"description": "Complete API collection for Humanoid Social Media Management Platform\n\n## Authentication\nMost endpoints require a Bearer token. First, register or login to get your JWT token.\n\n## Base URL\nLocal: http://localhost:3000\n\n## Modules\n- Authentication\n- Workspaces\n- RBAC (Permissions)\n- Campaigns\n- Designer\n- Publisher\n- Approval Workflow\n- Social Ads\n- Agency Accounts",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\",\n  \"name\": \"John Doe\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						},
+						"description": "Register a new user. Upon registration, user is assigned createdBy to their own ID."
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "Login with email and password to get JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/auth/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"me"
+							]
+						},
+						"description": "Get current authenticated user details"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Workspaces",
+			"item": [
+				{
+					"name": "Create Workspace",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"My Agency Workspace\",\n  \"description\": \"Workspace for managing client campaigns\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/workspaces",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"workspaces"
+							]
+						},
+						"description": "Create a new workspace. Creator automatically gets all permissions for this workspace."
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Workspaces",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/workspaces",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"workspaces"
+							]
+						},
+						"description": "Get all workspaces the user has access to"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workspace by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/workspaces/:workspaceId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"workspaces",
+								":workspaceId"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "{{workspace_id}}"
+								}
+							]
+						},
+						"description": "Get a specific workspace by ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Workspace",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Workspace Name\",\n  \"description\": \"Updated description\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/workspaces/:workspaceId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"workspaces",
+								":workspaceId"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "{{workspace_id}}"
+								}
+							]
+						},
+						"description": "Update workspace details"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Workspace",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/workspaces/:workspaceId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"workspaces",
+								":workspaceId"
+							],
+							"variable": [
+								{
+									"key": "workspaceId",
+									"value": "{{workspace_id}}"
+								}
+							]
+						},
+						"description": "Soft delete a workspace"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "RBAC - Permissions",
+			"item": [
+				{
+					"name": "Seed Permissions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/permissions/seed",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"permissions",
+								"seed"
+							]
+						},
+						"description": "Seed all permissions in the database (workspace, campaign, designer, publisher resources with create, update, view, delete, approve actions)"
+					},
+					"response": []
+				},
+				{
+					"name": "Assign Permission to User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"userId\": \"user-uuid\",\n  \"workspaceId\": \"workspace-uuid\",\n  \"resource\": \"campaign\",\n  \"action\": \"create\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/user-workspace-permissions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user-workspace-permissions"
+							]
+						},
+						"description": "Assign a specific permission to a user for a workspace"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Permissions for Workspace",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/user-workspace-permissions/:userId/:workspaceId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user-workspace-permissions",
+								":userId",
+								":workspaceId"
+							],
+							"variable": [
+								{
+									"key": "userId",
+									"value": "{{user_id}}"
+								},
+								{
+									"key": "workspaceId",
+									"value": "{{workspace_id}}"
+								}
+							]
+						},
+						"description": "Get all permissions for a user in a specific workspace"
+					},
+					"response": []
+				},
+				{
+					"name": "Revoke Permission",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/user-workspace-permissions/:permissionId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user-workspace-permissions",
+								":permissionId"
+							],
+							"variable": [
+								{
+									"key": "permissionId",
+									"value": "{{permission_id}}"
+								}
+							]
+						},
+						"description": "Revoke a specific permission from a user"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Social Ads",
+			"item": [
+				{
+					"name": "Social Media Accounts",
+					"item": [
+						{
+							"name": "Get Workspace Social Accounts",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ads/accounts",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ads",
+										"accounts"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										}
+									]
+								},
+								"description": "Get all social media accounts connected to this workspace"
+							},
+							"response": []
+						},
+						{
+							"name": "Initiate OAuth",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"platformType\": \"meta\",\n  \"workspaceId\": \"{{workspace_id}}\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/social-media-auth/initiate",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"social-media-auth",
+										"initiate"
+									]
+								},
+								"description": "Initiate OAuth flow for connecting a social media account"
+							},
+							"response": []
+						},
+						{
+							"name": "Complete OAuth",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"code\": \"oauth_authorization_code\",\n  \"state\": \"state_string\",\n  \"platformType\": \"meta\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/social-media-auth/complete",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"social-media-auth",
+										"complete"
+									]
+								},
+								"description": "Complete OAuth flow and save access tokens"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Campaigns",
+					"item": [
+						{
+							"name": "Create Campaign",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"accountId\": \"social-account-uuid\",\n  \"name\": \"Summer Sale Campaign\",\n  \"objective\": \"CONVERSIONS\",\n  \"status\": \"PAUSED\",\n  \"budgetType\": \"DAILY\",\n  \"budget\": 5000,\n  \"startDate\": \"2025-10-01\",\n  \"endDate\": \"2025-10-31\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ad-campaigns",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ad-campaigns"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										}
+									]
+								},
+								"description": "Create a new social media ad campaign"
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Campaigns",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ad-campaigns",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ad-campaigns"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										}
+									]
+								},
+								"description": "Get all campaigns for this workspace"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Campaign by ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ad-campaigns/:campaignId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ad-campaigns",
+										":campaignId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										},
+										{
+											"key": "campaignId",
+											"value": "{{campaign_id}}"
+										}
+									]
+								},
+								"description": "Get a specific campaign"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Campaign",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Updated Campaign Name\",\n  \"budget\": 7500,\n  \"status\": \"ACTIVE\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ad-campaigns/:campaignId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ad-campaigns",
+										":campaignId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										},
+										{
+											"key": "campaignId",
+											"value": "{{campaign_id}}"
+										}
+									]
+								},
+								"description": "Update campaign details"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Campaign",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ad-campaigns/:campaignId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ad-campaigns",
+										":campaignId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										},
+										{
+											"key": "campaignId",
+											"value": "{{campaign_id}}"
+										}
+									]
+								},
+								"description": "Delete a campaign"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Ads",
+					"item": [
+						{
+							"name": "Create Ad",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"accountId\": \"social-account-uuid\",\n  \"campaignId\": \"campaign-uuid\",\n  \"pageId\": \"facebook-page-id\",\n  \"name\": \"Summer Sale Ad #1\",\n  \"objective\": \"CONVERSIONS\",\n  \"type\": \"IMAGE\",\n  \"status\": \"PAUSED\",\n  \"budget\": 1000,\n  \"targeting\": {\n    \"ageMin\": 25,\n    \"ageMax\": 45,\n    \"genders\": [\"male\", \"female\"],\n    \"locations\": [\"US\"],\n    \"interests\": [\"technology\", \"shopping\"]\n  },\n  \"creatives\": [\n    {\n      \"type\": \"IMAGE\",\n      \"mediaUrl\": \"https://example.com/image.jpg\",\n      \"headline\": \"50% Off Summer Sale!\",\n      \"body\": \"Don't miss out on amazing deals\",\n      \"callToAction\": \"SHOP_NOW\",\n      \"destinationUrl\": \"https://example.com/sale\"\n    }\n  ]\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ads/ads",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ads",
+										"ads"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										}
+									]
+								},
+								"description": "Create a new ad with targeting and creative"
+							},
+							"response": []
+						},
+						{
+							"name": "Get All Ads",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ads/ads",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ads",
+										"ads"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										}
+									]
+								},
+								"description": "Get all ads for this workspace"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Ad by ID",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ads/ads/:adId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ads",
+										"ads",
+										":adId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										},
+										{
+											"key": "adId",
+											"value": "{{ad_id}}"
+										}
+									]
+								},
+								"description": "Get a specific ad with all details"
+							},
+							"response": []
+						},
+						{
+							"name": "Update Ad",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Updated Ad Name\",\n  \"budget\": 1500,\n  \"status\": \"ACTIVE\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ads/ads/:adId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ads",
+										"ads",
+										":adId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										},
+										{
+											"key": "adId",
+											"value": "{{ad_id}}"
+										}
+									]
+								},
+								"description": "Update ad details"
+							},
+							"response": []
+						},
+						{
+							"name": "Pause Ad",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ads/ads/:adId/pause",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ads",
+										"ads",
+										":adId",
+										"pause"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										},
+										{
+											"key": "adId",
+											"value": "{{ad_id}}"
+										}
+									]
+								},
+								"description": "Pause a running ad"
+							},
+							"response": []
+						},
+						{
+							"name": "Resume Ad",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ads/ads/:adId/resume",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ads",
+										"ads",
+										":adId",
+										"resume"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										},
+										{
+											"key": "adId",
+											"value": "{{ad_id}}"
+										}
+									]
+								},
+								"description": "Resume a paused ad"
+							},
+							"response": []
+						},
+						{
+							"name": "Get Ad Performance",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ads/ads/:adId/performance?startDate=2025-10-01&endDate=2025-10-31",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ads",
+										"ads",
+										":adId",
+										"performance"
+									],
+									"query": [
+										{
+											"key": "startDate",
+											"value": "2025-10-01"
+										},
+										{
+											"key": "endDate",
+											"value": "2025-10-31"
+										}
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										},
+										{
+											"key": "adId",
+											"value": "{{ad_id}}"
+										}
+									]
+								},
+								"description": "Get ad performance metrics for a date range"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete Ad",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{access_token}}"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/workspaces/:workspaceId/social-ads/ads/:adId",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"workspaces",
+										":workspaceId",
+										"social-ads",
+										"ads",
+										":adId"
+									],
+									"variable": [
+										{
+											"key": "workspaceId",
+											"value": "{{workspace_id}}"
+										},
+										{
+											"key": "adId",
+											"value": "{{ad_id}}"
+										}
+									]
+								},
+								"description": "Delete an ad"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Agency Accounts",
+			"item": [
+				{
+					"name": "Create Agency Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"platformType\": \"meta\",\n  \"name\": \"My Agency Business Manager\",\n  \"description\": \"Main business manager for agency clients\",\n  \"businessManagerId\": \"your-business-manager-id\",\n  \"type\": \"meta_business_manager\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/agency-accounts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"agency-accounts"
+							]
+						},
+						"description": "Create a new agency account (Business Manager)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Agency Accounts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/agency-accounts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"agency-accounts"
+							]
+						},
+						"description": "Get all agency accounts for the current user"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Agency Account by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/agency-accounts/:agencyAccountId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"agency-accounts",
+								":agencyAccountId"
+							],
+							"variable": [
+								{
+									"key": "agencyAccountId",
+									"value": "{{agency_account_id}}"
+								}
+							]
+						},
+						"description": "Get a specific agency account"
+					},
+					"response": []
+				},
+				{
+					"name": "Authenticate Agency Account",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"code\": \"oauth_authorization_code\",\n  \"state\": \"state_string\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/agency-accounts/:agencyAccountId/auth/complete",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"agency-accounts",
+								":agencyAccountId",
+								"auth",
+								"complete"
+							],
+							"variable": [
+								{
+									"key": "agencyAccountId",
+									"value": "{{agency_account_id}}"
+								}
+							]
+						},
+						"description": "Complete OAuth for agency account to get long-lived token"
+					},
+					"response": []
+				},
+				{
+					"name": "Link Social Account to Agency",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/agency-accounts/:agencyAccountId/link/:socialMediaAccountId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"agency-accounts",
+								":agencyAccountId",
+								"link",
+								":socialMediaAccountId"
+							],
+							"variable": [
+								{
+									"key": "agencyAccountId",
+									"value": "{{agency_account_id}}"
+								},
+								{
+									"key": "socialMediaAccountId",
+									"value": "{{social_account_id}}"
+								}
+							]
+						},
+						"description": "Link a social media account to an agency for management. System verifies agency has access to the page in Business Manager."
+					},
+					"response": []
+				},
+				{
+					"name": "Unlink Social Account from Agency",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/agency-accounts/:agencyAccountId/unlink/:socialMediaAccountId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"agency-accounts",
+								":agencyAccountId",
+								"unlink",
+								":socialMediaAccountId"
+							],
+							"variable": [
+								{
+									"key": "agencyAccountId",
+									"value": "{{agency_account_id}}"
+								},
+								{
+									"key": "socialMediaAccountId",
+									"value": "{{social_account_id}}"
+								}
+							]
+						},
+						"description": "Unlink a social media account from agency management"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Agency Accessible Pages",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/agency-accounts/:agencyAccountId/accessible-pages",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"agency-accounts",
+								":agencyAccountId",
+								"accessible-pages"
+							],
+							"variable": [
+								{
+									"key": "agencyAccountId",
+									"value": "{{agency_account_id}}"
+								}
+							]
+						},
+						"description": "Get all Facebook Pages accessible by this agency in Business Manager"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Agency Accessible Ad Accounts",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/agency-accounts/:agencyAccountId/accessible-ad-accounts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"agency-accounts",
+								":agencyAccountId",
+								"accessible-ad-accounts"
+							],
+							"variable": [
+								{
+									"key": "agencyAccountId",
+									"value": "{{agency_account_id}}"
+								}
+							]
+						},
+						"description": "Get all ad accounts accessible by this agency in Business Manager"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Agency Account",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Agency Name\",\n  \"description\": \"Updated description\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/agency-accounts/:agencyAccountId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"agency-accounts",
+								":agencyAccountId"
+							],
+							"variable": [
+								{
+									"key": "agencyAccountId",
+									"value": "{{agency_account_id}}"
+								}
+							]
+						},
+						"description": "Update agency account details"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Agency Account",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/agency-accounts/:agencyAccountId",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"agency-accounts",
+								":agencyAccountId"
+							],
+							"variable": [
+								{
+									"key": "agencyAccountId",
+									"value": "{{agency_account_id}}"
+								}
+							]
+						},
+						"description": "Delete an agency account"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "your_jwt_token_here",
+			"type": "string"
+		},
+		{
+			"key": "workspace_id",
+			"value": "workspace-uuid",
+			"type": "string"
+		},
+		{
+			"key": "user_id",
+			"value": "user-uuid",
+			"type": "string"
+		},
+		{
+			"key": "campaign_id",
+			"value": "campaign-uuid",
+			"type": "string"
+		},
+		{
+			"key": "ad_id",
+			"value": "ad-uuid",
+			"type": "string"
+		},
+		{
+			"key": "social_account_id",
+			"value": "social-account-uuid",
+			"type": "string"
+		},
+		{
+			"key": "agency_account_id",
+			"value": "agency-account-uuid",
+			"type": "string"
+		},
+		{
+			"key": "permission_id",
+			"value": "permission-uuid",
+			"type": "string"
+		}
+	]
+}
