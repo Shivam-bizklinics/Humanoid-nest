@@ -3,6 +3,12 @@ import { User } from '../../authentication/entities/user.entity';
 import { BaseEntity } from '../../../shared/interfaces/base.interface';
 import { UserWorkspace } from '../../rbac/entities/user-workspace.entity';
 
+export enum WorkspaceSetupStatus {
+  PENDING = 'pending',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+}
+
 @Entity('workspaces')
 export class Workspace implements BaseEntity {
   @PrimaryGeneratedColumn('uuid')
@@ -16,6 +22,25 @@ export class Workspace implements BaseEntity {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: WorkspaceSetupStatus,
+    default: WorkspaceSetupStatus.PENDING
+  })
+  setupStatus: WorkspaceSetupStatus;
+
+  @Column({ nullable: true })
+  brandName?: string;
+
+  @Column({ nullable: true })
+  brandWebsite?: string;
+
+  @Column({ type: 'text', nullable: true })
+  brandDescription?: string;
+
+  @Column({ nullable: true })
+  brandLogo?: string;
 
   @Column('uuid')
   ownerId: string;

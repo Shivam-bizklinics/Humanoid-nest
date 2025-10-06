@@ -1,6 +1,7 @@
-import { IsString, IsOptional, IsUUID, IsEnum } from 'class-validator';
+import { IsString, IsOptional, IsUUID, IsEnum, IsUrl } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { WorkspaceAccessLevel } from '../../rbac/entities/user-workspace.entity';
+import { WorkspaceSetupStatus } from '../entities/workspace.entity';
 
 export class CreateWorkspaceDto {
   @ApiProperty({ description: 'Workspace name' })
@@ -11,6 +12,26 @@ export class CreateWorkspaceDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({ description: 'Brand name' })
+  @IsOptional()
+  @IsString()
+  brandName?: string;
+
+  @ApiPropertyOptional({ description: 'Brand website URL' })
+  @IsOptional()
+  @IsUrl()
+  brandWebsite?: string;
+
+  @ApiPropertyOptional({ description: 'Brand description' })
+  @IsOptional()
+  @IsString()
+  brandDescription?: string;
+
+  @ApiPropertyOptional({ description: 'Brand logo URL' })
+  @IsOptional()
+  @IsString()
+  brandLogo?: string;
 }
 
 export class UpdateWorkspaceDto {
@@ -23,6 +44,31 @@ export class UpdateWorkspaceDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({ description: 'Workspace setup status', enum: WorkspaceSetupStatus })
+  @IsOptional()
+  @IsEnum(WorkspaceSetupStatus)
+  setupStatus?: WorkspaceSetupStatus;
+
+  @ApiPropertyOptional({ description: 'Brand name' })
+  @IsOptional()
+  @IsString()
+  brandName?: string;
+
+  @ApiPropertyOptional({ description: 'Brand website URL' })
+  @IsOptional()
+  @IsUrl()
+  brandWebsite?: string;
+
+  @ApiPropertyOptional({ description: 'Brand description' })
+  @IsOptional()
+  @IsString()
+  brandDescription?: string;
+
+  @ApiPropertyOptional({ description: 'Brand logo URL' })
+  @IsOptional()
+  @IsString()
+  brandLogo?: string;
 }
 
 export class AddUserToWorkspaceDto {
@@ -54,6 +100,21 @@ export class WorkspaceResponseDto {
 
   @ApiProperty({ description: 'Is workspace active' })
   isActive: boolean;
+
+  @ApiProperty({ description: 'Workspace setup status', enum: WorkspaceSetupStatus })
+  setupStatus: WorkspaceSetupStatus;
+
+  @ApiPropertyOptional({ description: 'Brand name' })
+  brandName?: string;
+
+  @ApiPropertyOptional({ description: 'Brand website URL' })
+  brandWebsite?: string;
+
+  @ApiPropertyOptional({ description: 'Brand description' })
+  brandDescription?: string;
+
+  @ApiPropertyOptional({ description: 'Brand logo URL' })
+  brandLogo?: string;
 
   @ApiProperty({ description: 'Creation date' })
   createdAt: Date;

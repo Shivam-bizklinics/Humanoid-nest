@@ -6,6 +6,7 @@ import { WorkspaceService } from '../services/workspace.service';
 import { CreateWorkspaceDto, UpdateWorkspaceDto, AddUserToWorkspaceDto, WorkspaceResponseDto } from '../dto/workspace.dto';
 import { Resource } from '../../../shared/enums/resource.enum';
 import { Action } from '../../../shared/enums/action.enum';
+import { WorkspaceSetupStatus } from '../entities/workspace.entity';
 
 @ApiTags('Workspaces')
 @ApiBearerAuth()
@@ -54,7 +55,11 @@ export class WorkspaceController {
     const workspace = await this.workspaceService.createWorkspace(
       createWorkspaceDto.name,
       createWorkspaceDto.description,
-      req.user.id
+      req.user.id,
+      createWorkspaceDto.brandName,
+      createWorkspaceDto.brandWebsite,
+      createWorkspaceDto.brandDescription,
+      createWorkspaceDto.brandLogo
     );
     
     return {
@@ -75,8 +80,15 @@ export class WorkspaceController {
   ) {
     const workspace = await this.workspaceService.updateWorkspace(
       workspaceId,
-      updateWorkspaceDto.name,
-      updateWorkspaceDto.description,
+      {
+        name: updateWorkspaceDto.name,
+        description: updateWorkspaceDto.description,
+        setupStatus: updateWorkspaceDto.setupStatus,
+        brandName: updateWorkspaceDto.brandName,
+        brandWebsite: updateWorkspaceDto.brandWebsite,
+        brandDescription: updateWorkspaceDto.brandDescription,
+        brandLogo: updateWorkspaceDto.brandLogo,
+      },
       req.user.id
     );
 
@@ -191,6 +203,116 @@ export class WorkspaceController {
       success: true,
       data: userWorkspace,
       message: 'User access level updated successfully'
+    };
+  }
+
+  @Put(':workspaceId/setup-status')
+  @RequirePermission(Resource.WORKSPACE, Action.UPDATE)
+  @ApiOperation({ summary: 'Update workspace setup status' })
+  @ApiResponse({ status: 200, description: 'Workspace setup status updated' })
+  async updateWorkspaceSetupStatus(
+    @Param('workspaceId') workspaceId: string,
+    @Body() body: { setupStatus: WorkspaceSetupStatus },
+    @Request() req,
+  ) {
+    const workspace = await this.workspaceService.updateWorkspaceSetupStatus(
+      workspaceId,
+      body.setupStatus,
+      req.user.id
+    );
+
+    return {
+      success: true,
+      data: workspace,
+      message: 'Workspace setup status updated successfully'
+    };
+  }
+
+  @Post(':workspaceId/complete-setup')
+  @RequirePermission(Resource.WORKSPACE, Action.UPDATE)
+  @ApiOperation({ summary: 'Complete workspace setup' })
+  @ApiResponse({ status: 200, description: 'Workspace setup completed' })
+  async completeWorkspaceSetup(
+    @Param('workspaceId') workspaceId: string,
+    @Request() req,
+  ) {
+    const workspace = await this.workspaceService.completeWorkspaceSetup(
+      workspaceId,
+      req.user.id
+    );
+
+    return {
+      success: true,
+      data: workspace,
+      message: 'Workspace setup completed successfully'
+    };
+  }
+
+  @Get('by-setup-status/:setupStatus')
+  @RequirePermission(Resource.WORKSPACE, Action.VIEW)
+  @ApiOperation({ summary: 'Get workspaces by setup status' })
+  @ApiResponse({ status: 200, description: 'Workspaces retrieved by setup status' })
+  async getWorkspacesBySetupStatus(
+    @Param('setupStatus') setupStatus: WorkspaceSetupStatus,
+  ) {
+    const workspaces = await this.workspaceService.getWorkspacesBySetupStatus(setupStatus);
+    
+    return {
+      success: true,
+      data: workspaces,
+      message: `Workspaces with ${setupStatus} status retrieved successfully`
+    };
+  }
+
+  @Post(':workspaceId/complete-setup-validated')
+  @RequirePermission(Resource.WORKSPACE, Action.UPDATE)
+  @ApiOperation({ summary: 'Complete workspace setup with validation' })
+  @ApiResponse({ status: 200, description: 'Workspace setup completed with validation' })
+  async completeWorkspaceSetupWithValidation(
+    @Param('workspaceId') workspaceId: string,
+    @Request() req,
+  ) {
+    const workspace = await this.workspaceService.completeWorkspaceSetupWithValidation(
+      workspaceId,
+      req.user.id
+    );
+
+    return {
+      success: true,
+      data: workspace,
+      message: 'Workspace setup completed successfully with validation'
+    };
+  }
+
+  @Get(':workspaceId/setup-progress')
+  @RequirePermission(Resource.WORKSPACE, Action.VIEW)
+  @ApiOperation({ summary: 'Get workspace setup progress' })
+  @ApiResponse({ status: 200, description: 'Workspace setup progress retrieved successfully' })
+  async getWorkspaceSetupProgress(
+    @Param('workspaceId') workspaceId: string,
+  ) {
+    const progress = await this.workspaceService.getWorkspaceSetupProgress(workspaceId);
+    
+    return {
+      success: true,
+      data: progress,
+      message: 'Workspace setup progress retrieved successfully'
+    };
+  }
+
+  @Get(':workspaceId/can-complete')
+  @RequirePermission(Resource.WORKSPACE, Action.VIEW)
+  @ApiOperation({ summary: 'Check if workspace can be completed' })
+  @ApiResponse({ status: 200, description: 'Completion validation retrieved successfully' })
+  async canCompleteWorkspaceSetup(
+    @Param('workspaceId') workspaceId: string,
+  ) {
+    const validation = await this.workspaceService.canCompleteWorkspaceSetup(workspaceId);
+    
+    return {
+      success: true,
+      data: validation,
+      message: 'Completion validation retrieved successfully'
     };
   }
 }

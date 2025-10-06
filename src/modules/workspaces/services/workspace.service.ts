@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Workspace } from '../entities/workspace.entity';
+import { Workspace, WorkspaceSetupStatus } from '../entities/workspace.entity';
 import { UserWorkspace } from '../../rbac/entities/user-workspace.entity';
 import { WorkspaceAccessLevel } from '../../rbac/entities/user-workspace.entity';
 import { User } from '../../authentication/entities/user.entity';
 import { PermissionSeederService } from '../../rbac/services/permission-seeder.service';
 import { UserWorkspacePermissionService } from '../../rbac/services/user-workspace-permission.service';
+import { BrandQuestionService } from './brand-question.service';
 import { Resource } from '../../../shared/enums/resource.enum';
 import { Action } from '../../../shared/enums/action.enum';
 
@@ -21,12 +22,17 @@ export class WorkspaceService {
     private readonly userRepository: Repository<User>,
     private readonly permissionSeederService: PermissionSeederService,
     private readonly userWorkspacePermissionService: UserWorkspacePermissionService,
+    private readonly brandQuestionService: BrandQuestionService,
   ) {}
 
   async createWorkspace(
     name: string,
     description: string,
     createdById: string,
+    brandName?: string,
+    brandWebsite?: string,
+    brandDescription?: string,
+    brandLogo?: string,
   ): Promise<Workspace> {
     // Step 1: Ensure all permissions are seeded in the database
     await this.permissionSeederService.seedAllPermissions();
@@ -38,6 +44,11 @@ export class WorkspaceService {
       ownerId: createdById,
       createdBy: createdById,
       updatedBy: createdById,
+      setupStatus: WorkspaceSetupStatus.PENDING,
+      brandName,
+      brandWebsite,
+      brandDescription,
+      brandLogo,
     });
 
     const savedWorkspace = await this.workspaceRepository.save(workspace);
@@ -108,13 +119,19 @@ export class WorkspaceService {
 
   async updateWorkspace(
     id: string,
-    name: string,
-    description: string,
+    updateData: {
+      name?: string;
+      description?: string;
+      setupStatus?: WorkspaceSetupStatus;
+      brandName?: string;
+      brandWebsite?: string;
+      brandDescription?: string;
+      brandLogo?: string;
+    },
     updatedById: string,
   ): Promise<Workspace> {
     await this.workspaceRepository.update(id, {
-      name,
-      description,
+      ...updateData,
       updatedBy: updatedById,
     });
 
@@ -202,5 +219,158 @@ export class WorkspaceService {
     userWorkspace.updatedBy = updatedBy;
 
     return this.userWorkspaceRepository.save(userWorkspace);
+  }
+
+  /**
+   * Update workspace setup status
+   */
+  async updateWorkspaceSetupStatus(
+    workspaceId: string,
+    setupStatus: WorkspaceSetupStatus,
+    updatedById: string,
+  ): Promise<Workspace> {
+    const workspace = await this.getWorkspaceById(workspaceId);
+    if (!workspace) {
+      throw new NotFoundException('Workspace not found');
+    }
+
+    await this.workspaceRepository.update(workspaceId, {
+      setupStatus,
+      updatedBy: updatedById,
+    });
+
+    return this.getWorkspaceById(workspaceId);
+  }
+
+  /**
+   * Complete workspace setup - marks setup as completed
+   */
+  async completeWorkspaceSetup(
+    workspaceId: string,
+    completedById: string,
+  ): Promise<Workspace> {
+    return this.updateWorkspaceSetupStatus(
+      workspaceId,
+      WorkspaceSetupStatus.COMPLETED,
+      completedById,
+    );
+  }
+
+  /**
+   * Get workspaces by setup status
+   */
+  async getWorkspacesBySetupStatus(
+    setupStatus: WorkspaceSetupStatus,
+  ): Promise<Workspace[]> {
+    return this.workspaceRepository.find({
+      where: { setupStatus, isActive: true },
+    });
+  }
+
+  /**
+   * Check if workspace can be marked as completed
+   * This includes checking questionnaire completion
+   */
+  async canCompleteWorkspaceSetup(workspaceId: string): Promise<{
+    canComplete: boolean;
+    questionnaireComplete: boolean;
+    missingRequirements: string[];
+  }> {
+    const workspace = await this.getWorkspaceById(workspaceId);
+    if (!workspace) {
+      throw new NotFoundException('Workspace not found');
+    }
+
+    // Check questionnaire completion
+    const questionnaireStatus = await this.brandQuestionService.validateQuestionnaireCompletion(workspaceId);
+    
+    const missingRequirements: string[] = [];
+    
+    if (!questionnaireStatus.isComplete) {
+      missingRequirements.push('Brand questionnaire not completed');
+      if (questionnaireStatus.missingMandatory.length > 0) {
+        missingRequirements.push(`Missing mandatory questions: ${questionnaireStatus.missingMandatory.join(', ')}`);
+      }
+    }
+
+    // Add other completion requirements here as needed
+    // For example: brand information, integrations, etc.
+
+    const canComplete = questionnaireStatus.isComplete && missingRequirements.length === 0;
+
+    return {
+      canComplete,
+      questionnaireComplete: questionnaireStatus.isComplete,
+      missingRequirements,
+    };
+  }
+
+  /**
+   * Complete workspace setup with validation
+   */
+  async completeWorkspaceSetupWithValidation(
+    workspaceId: string,
+    completedById: string,
+  ): Promise<Workspace> {
+    const validation = await this.canCompleteWorkspaceSetup(workspaceId);
+    
+    if (!validation.canComplete) {
+      throw new ConflictException(
+        `Cannot complete workspace setup. Missing requirements: ${validation.missingRequirements.join(', ')}`
+      );
+    }
+
+    return this.completeWorkspaceSetup(workspaceId, completedById);
+  }
+
+  /**
+   * Get workspace setup progress
+   */
+  async getWorkspaceSetupProgress(workspaceId: string): Promise<{
+    workspace: Workspace;
+    questionnaireStatus: any;
+    completionValidation: any;
+    overallProgress: number;
+  }> {
+    const workspace = await this.getWorkspaceById(workspaceId);
+    if (!workspace) {
+      throw new NotFoundException('Workspace not found');
+    }
+
+    const questionnaireStatus = await this.brandQuestionService.validateQuestionnaireCompletion(workspaceId);
+    const completionValidation = await this.canCompleteWorkspaceSetup(workspaceId);
+
+    // Calculate overall progress (0-100)
+    let progress = 0;
+    
+    // Basic workspace info (20%)
+    if (workspace.name && workspace.description) {
+      progress += 20;
+    }
+
+    // Brand information (30%)
+    if (workspace.brandName && workspace.brandWebsite) {
+      progress += 30;
+    }
+
+    // Questionnaire completion (50%)
+    if (questionnaireStatus.isComplete) {
+      progress += 50;
+    } else {
+      // Get detailed questionnaire status for progress calculation
+      const detailedQuestionnaire = await this.brandQuestionService.getQuestionnaireForWorkspace(workspaceId);
+      if (detailedQuestionnaire.completionStatus.answeredMandatory > 0) {
+        // Partial progress based on answered mandatory questions
+        const questionnaireProgress = (detailedQuestionnaire.completionStatus.answeredMandatory / detailedQuestionnaire.completionStatus.mandatoryQuestions) * 50;
+        progress += questionnaireProgress;
+      }
+    }
+
+    return {
+      workspace,
+      questionnaireStatus,
+      completionValidation,
+      overallProgress: Math.round(progress),
+    };
   }
 }

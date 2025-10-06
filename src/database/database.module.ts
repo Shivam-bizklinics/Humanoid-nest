@@ -20,6 +20,8 @@ import { SocialAdTargeting } from '../modules/social-ads/entities/social-ad-targ
 import { SocialAdPerformance } from '../modules/social-ads/entities/social-ad-performance.entity';
 import { AgencyAccount } from '../modules/social-ads/entities/agency-account.entity';
 import { AgencyAuth } from '../modules/social-ads/entities/agency-auth.entity';
+import { BrandQuestion } from '../modules/workspaces/entities/brand-question.entity';
+import { BrandQuestionResponse } from '../modules/workspaces/entities/brand-question-response.entity';
 
 @Module({
   imports: [
@@ -52,6 +54,8 @@ import { AgencyAuth } from '../modules/social-ads/entities/agency-auth.entity';
                   SocialAdPerformance,
                   AgencyAccount,
                   AgencyAuth,
+                  BrandQuestion,
+                  BrandQuestionResponse,
                 ],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development' ? ['query', 'error'] : ['error'],
