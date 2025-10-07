@@ -1,6 +1,6 @@
-import { Module } from '@nestjs/common';
+import { Module, Provider } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Permission } from './entities/permission.entity';
 import { UserWorkspace } from './entities/user-workspace.entity';
@@ -12,6 +12,9 @@ import { UserWorkspacePermissionGuard } from './guards/user-workspace-permission
 import { UserWorkspacePermissionController } from './controllers/user-workspace-permission.controller';
 import { PermissionSeederService } from './services/permission-seeder.service';
 import { PermissionSeederController } from './controllers/permission-seeder.controller';
+import { ImpersonationSession } from './entities/impersonation-session.entity';
+import { ImpersonationService } from './services/impersonation.service';
+import { ImpersonationController } from './controllers/impersonation.controller';
 import { UserRepository } from '../authentication/repositories/user.repository';
 import { AuthService } from '../../shared/services/auth.service';
 
@@ -21,6 +24,7 @@ import { AuthService } from '../../shared/services/auth.service';
       Permission, 
       UserWorkspace, 
       UserWorkspacePermission,
+      ImpersonationSession,
       User,
       Workspace
     ]),
@@ -32,18 +36,34 @@ import { AuthService } from '../../shared/services/auth.service';
       inject: [ConfigService],
     }),
   ],
-  controllers: [UserWorkspacePermissionController, PermissionSeederController],
+  controllers: [UserWorkspacePermissionController, PermissionSeederController, ImpersonationController],
   providers: [
     UserWorkspacePermissionService,
     UserWorkspacePermissionGuard,
     PermissionSeederService,
+    ImpersonationService,
     UserRepository,
-    AuthService,
+    {
+      provide: AuthService,
+      useFactory: (
+        jwtService: JwtService,
+        configService: ConfigService,
+        userRepository: UserRepository,
+        impersonationService: ImpersonationService,
+      ) => {
+        const authService = new AuthService(jwtService, configService, userRepository);
+        // Inject the impersonation service using the setter method
+        authService.setImpersonationService(impersonationService);
+        return authService;
+      },
+      inject: [JwtService, ConfigService, UserRepository, ImpersonationService],
+    },
   ],
   exports: [
     UserWorkspacePermissionService,
     UserWorkspacePermissionGuard,
     PermissionSeederService,
+    ImpersonationService,
     UserRepository,
     AuthService,
     JwtModule,

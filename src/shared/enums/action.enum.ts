@@ -5,6 +5,7 @@ export enum Action {
   DELETE = 'delete',
   APPROVE = 'approve',
   UPLOAD = 'upload',
+  IMPERSONATE = 'impersonate',
 }
 
 export enum ActionDisplayName {
@@ -14,6 +15,7 @@ export enum ActionDisplayName {
   DELETE = 'Delete',
   APPROVE = 'Approve',
   UPLOAD = 'Upload',
+  IMPERSONATE = 'Impersonate',
 }
 
 export const ACTION_CONFIG = {
@@ -64,6 +66,14 @@ export const ACTION_CONFIG = {
     color: '#10B981',
     verb: 'upload',
     pastTense: 'uploaded',
+  },
+  [Action.IMPERSONATE]: {
+    displayName: ActionDisplayName.IMPERSONATE,
+    description: 'Impersonate other users and work on their behalf',
+    icon: 'person',
+    color: '#8B5CF6',
+    verb: 'impersonate',
+    pastTense: 'impersonated',
   },
 } as const;
 

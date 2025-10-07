@@ -3,6 +3,7 @@ export enum Resource {
   CAMPAIGN = 'campaign',
   DESIGNER = 'designer',
   PUBLISHER = 'publisher',
+  USER = 'user',
 }
 
 export enum ResourceDisplayName {
@@ -10,6 +11,7 @@ export enum ResourceDisplayName {
   CAMPAIGN = 'Campaign',
   DESIGNER = 'Designer',
   PUBLISHER = 'Publisher',
+  USER = 'User',
 }
 
 export const RESOURCE_CONFIG = {
@@ -36,6 +38,12 @@ export const RESOURCE_CONFIG = {
     description: 'Content publishing and distribution',
     icon: 'publish',
     color: '#EF4444',
+  },
+  [Resource.USER]: {
+    displayName: ResourceDisplayName.USER,
+    description: 'User management and impersonation',
+    icon: 'person',
+    color: '#8B5CF6',
   },
 } as const;
 

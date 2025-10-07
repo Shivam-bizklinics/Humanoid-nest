@@ -5,6 +5,7 @@ import { User } from '../modules/authentication/entities/user.entity';
 import { Permission } from '../modules/rbac/entities/permission.entity';
 import { UserWorkspace } from '../modules/rbac/entities/user-workspace.entity';
 import { UserWorkspacePermission } from '../modules/rbac/entities/user-workspace-permission.entity';
+import { ImpersonationSession } from '../modules/rbac/entities/impersonation-session.entity';
 import { Workspace } from '../modules/workspaces/entities/workspace.entity';
 import { Campaign } from '../modules/campaigns/entities/campaign.entity';
 import { Design } from '../modules/designer/entities/design.entity';
@@ -40,6 +41,7 @@ import { FileUpload } from '../modules/file-upload/entities/file-upload.entity';
                   Permission,
                   UserWorkspace,
                   UserWorkspacePermission,
+                  ImpersonationSession,
                   Workspace,
                   Campaign,
                   Design,

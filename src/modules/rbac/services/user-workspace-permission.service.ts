@@ -327,6 +327,29 @@ export class UserWorkspacePermissionService {
   }
 
   /**
+   * Check if user has a specific permission in any workspace
+   */
+  async userHasPermissionInAnyWorkspace(
+    userId: string,
+    resource: string,
+    action: string,
+  ): Promise<boolean> {
+    const permission = await this.userWorkspacePermissionRepository.findOne({
+      where: {
+        userId,
+        isActive: true,
+        permission: {
+          name: `${resource}.${action}`,
+          isActive: true,
+        },
+      },
+      relations: ['permission'],
+    });
+
+    return !!permission;
+  }
+
+  /**
    * Bulk assign permissions to multiple users for a workspace
    */
   async bulkAssignPermissions(

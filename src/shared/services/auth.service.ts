@@ -5,6 +5,8 @@ import { UserRepository } from '../../modules/authentication/repositories/user.r
 
 @Injectable()
 export class AuthService {
+  private impersonationService?: any;
+
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -48,6 +50,21 @@ export class AuthService {
       // Remove password from user object for security
       delete user.password;
 
+      // Check for impersonation context
+      const impersonationContext = await this.getImpersonationContext(user.id);
+      if (impersonationContext) {
+        // Return the impersonated user but keep impersonation metadata
+        return {
+          ...impersonationContext.impersonatedUser,
+          _impersonationContext: {
+            isImpersonated: true,
+            impersonator: impersonationContext.impersonator,
+            sessionId: impersonationContext.session.id,
+            startedAt: impersonationContext.session.startedAt,
+          },
+        };
+      }
+
       return user;
     } catch (error) {
       if (error instanceof UnauthorizedException) {
@@ -76,5 +93,37 @@ export class AuthService {
     const user = await this.getUserFromToken(request);
     request.user = user;
     return user;
+  }
+
+  /**
+   * Set impersonation service (used by dependency injection)
+   * @param impersonationService - The impersonation service instance
+   */
+  setImpersonationService(impersonationService: any): void {
+    this.impersonationService = impersonationService;
+  }
+
+  /**
+   * Get impersonation context for a user
+   * @param userId - User ID to check for impersonation
+   * @returns Promise<any> - Impersonation context or null
+   */
+  private async getImpersonationContext(userId: string): Promise<any> {
+    try {
+      // Check if impersonation service is available
+      if (!this.impersonationService) {
+        return null;
+      }
+
+      // Get the impersonation context from the service
+      const context = await this.impersonationService.getImpersonationContext(userId);
+      
+      return context;
+    } catch (error) {
+      // If there's an error getting impersonation context, log it but don't fail
+      // This ensures that authentication still works even if impersonation service is unavailable
+      console.warn('Failed to get impersonation context:', error.message);
+      return null;
+    }
   }
 }
