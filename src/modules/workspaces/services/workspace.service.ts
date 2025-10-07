@@ -8,6 +8,7 @@ import { User } from '../../authentication/entities/user.entity';
 import { PermissionSeederService } from '../../rbac/services/permission-seeder.service';
 import { UserWorkspacePermissionService } from '../../rbac/services/user-workspace-permission.service';
 import { BrandQuestionService } from './brand-question.service';
+import { FileUploadService } from '../../file-upload/services/file-upload.service';
 import { Resource } from '../../../shared/enums/resource.enum';
 import { Action } from '../../../shared/enums/action.enum';
 
@@ -23,6 +24,7 @@ export class WorkspaceService {
     private readonly permissionSeederService: PermissionSeederService,
     private readonly userWorkspacePermissionService: UserWorkspacePermissionService,
     private readonly brandQuestionService: BrandQuestionService,
+    private readonly fileUploadService: FileUploadService,
   ) {}
 
   async createWorkspace(
@@ -139,8 +141,19 @@ export class WorkspaceService {
   }
 
   async deleteWorkspace(id: string): Promise<boolean> {
-    const result = await this.workspaceRepository.softDelete(id);
-    return result.affected > 0;
+    try {
+      // Clean up workspace files
+      await this.fileUploadService.cleanupWorkspaceFiles(id);
+      
+      // Soft delete workspace
+      const result = await this.workspaceRepository.softDelete(id);
+      return result.affected > 0;
+    } catch (error) {
+      // Log error but still try to delete workspace
+      console.error('Error cleaning up workspace files:', error);
+      const result = await this.workspaceRepository.softDelete(id);
+      return result.affected > 0;
+    }
   }
 
   async addUserToWorkspace(

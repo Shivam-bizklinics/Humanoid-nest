@@ -1,19 +1,15 @@
 import { Injectable, CanActivate, ExecutionContext, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { UserWorkspacePermissionService } from '../services/user-workspace-permission.service';
 import { PERMISSION_KEY, PermissionMetadata } from '../../../shared/decorators/permission.decorator';
-import { UserRepository } from '../../authentication/repositories/user.repository';
+import { AuthService } from '../../../shared/services/auth.service';
 
 @Injectable()
 export class UserWorkspacePermissionGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private readonly userWorkspacePermissionService: UserWorkspacePermissionService,
-    private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
-    private readonly userRepository: UserRepository,
+    private readonly authService: AuthService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -29,7 +25,7 @@ export class UserWorkspacePermissionGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     
     // Extract user from Bearer token
-    const user = await this.getUserFromToken(request);
+    const user = await this.authService.getUserFromToken(request);
 
     if (!user) {
       throw new UnauthorizedException('User not authenticated');
@@ -107,44 +103,4 @@ export class UserWorkspacePermissionGuard implements CanActivate {
     return null;
   }
 
-  private async getUserFromToken(request: any): Promise<any> {
-    try {
-      // Extract token from Authorization header
-      const authHeader = request.headers.authorization;
-      
-      if (!authHeader) {
-        throw new UnauthorizedException('Authorization header not found');
-      }
-
-      // Check if it's a Bearer token
-      const parts = authHeader.split(' ');
-      if (parts.length !== 2 || parts[0] !== 'Bearer') {
-        throw new UnauthorizedException('Invalid authorization header format. Expected: Bearer <token>');
-      }
-
-      const token = parts[1];
-
-      // Verify and decode the JWT token
-      const payload = await this.jwtService.verifyAsync(token, {
-        secret: this.configService.get<string>('JWT_SECRET') || 'your-secret-key',
-      });
-
-      // Get user from database using the payload
-      const user = await this.userRepository.findById(payload.sub);
-
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
-
-      // Remove password from user object for security
-      delete user.password;
-
-      return user;
-    } catch (error) {
-      if (error instanceof UnauthorizedException) {
-        throw error;
-      }
-      throw new UnauthorizedException('Invalid or expired token');
-    }
-  }
 }

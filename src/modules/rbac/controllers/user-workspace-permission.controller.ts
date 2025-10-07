@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Delete, Body, Param, Query, Request } from '@nestjs/common';
+import { Controller, Get, Post, Delete, Body, Param, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UserWorkspacePermissionService, AssignPermissionDto, UserWorkspacePermissionsDto } from '../services/user-workspace-permission.service';
 import { Resource } from '../../../shared/enums/resource.enum';
 import { Action } from '../../../shared/enums/action.enum';
+import { CurrentUserId } from '../../../shared/decorators/current-user-id.decorator';
 
 @ApiTags('User Workspace Permissions')
 @ApiBearerAuth()
@@ -19,11 +20,11 @@ export class UserWorkspacePermissionController {
   @ApiResponse({ status: 404, description: 'User, workspace, or permission not found' })
   async assignPermission(
     @Body() assignDto: AssignPermissionDto,
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const userWorkspacePermission = await this.userWorkspacePermissionService.assignPermission(
       assignDto,
-      req.user.id
+      userId
     );
 
     return {
@@ -39,11 +40,11 @@ export class UserWorkspacePermissionController {
   @ApiResponse({ status: 403, description: 'Only Super Admins can assign permissions' })
   async assignMultiplePermissions(
     @Body() assignDto: UserWorkspacePermissionsDto,
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const userWorkspacePermissions = await this.userWorkspacePermissionService.assignMultiplePermissions(
       assignDto,
-      req.user.id
+      userId
     );
 
     return {
@@ -209,12 +210,12 @@ export class UserWorkspacePermissionController {
         permissions: { resource: Resource; action: Action }[];
       }>;
     },
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const results = await this.userWorkspacePermissionService.bulkAssignPermissions(
       workspaceId,
       body.userPermissions,
-      req.user.id
+      userId
     );
 
     return {

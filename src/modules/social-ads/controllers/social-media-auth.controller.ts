@@ -16,7 +16,7 @@ export class SocialMediaAuthController {
   @Post('initiate/:accountId')
   @ApiOperation({ summary: 'Initiate social media authentication' })
   @ApiResponse({ status: 200, description: 'Authentication initiated successfully' })
-  async initiateAuth(@Param('accountId') accountId: string, @Request() req) {
+  async initiateAuth(@Param('accountId') accountId: string) {
     const account = await this.socialMediaService.getAccount(accountId);
     const { authUrl, state } = await this.authService.initiateAuth(accountId, account.platform.type);
     
@@ -33,7 +33,6 @@ export class SocialMediaAuthController {
   async completeAuth(
     @Param('accountId') accountId: string,
     @Body() body: { code: string; state: string },
-    @Request() req,
   ) {
     const auth = await this.authService.completeAuth(accountId, body.code, body.state);
     return {
@@ -46,7 +45,7 @@ export class SocialMediaAuthController {
   @Post('refresh/:authId')
   @ApiOperation({ summary: 'Refresh authentication token' })
   @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
-  async refreshAuth(@Param('authId') authId: string, @Request() req) {
+  async refreshAuth(@Param('authId') authId: string) {
     const auth = await this.authService.refreshAuth(authId);
     return {
       success: true,
@@ -58,7 +57,7 @@ export class SocialMediaAuthController {
   @Post('revoke/:authId')
   @ApiOperation({ summary: 'Revoke authentication token' })
   @ApiResponse({ status: 200, description: 'Token revoked successfully' })
-  async revokeAuth(@Param('authId') authId: string, @Request() req) {
+  async revokeAuth(@Param('authId') authId: string) {
     const success = await this.authService.revokeAuth(authId);
     return {
       success,
@@ -69,7 +68,7 @@ export class SocialMediaAuthController {
   @Get('validate/:authId')
   @ApiOperation({ summary: 'Validate authentication token' })
   @ApiResponse({ status: 200, description: 'Token validation result' })
-  async validateAuth(@Param('authId') authId: string, @Request() req) {
+  async validateAuth(@Param('authId') authId: string) {
     const isValid = await this.authService.validateAuth(authId);
     return {
       success: true,
@@ -81,7 +80,7 @@ export class SocialMediaAuthController {
   @Get('accounts/:accountId/auths')
   @ApiOperation({ summary: 'Get account authentication records' })
   @ApiResponse({ status: 200, description: 'Authentication records retrieved successfully' })
-  async getAccountAuths(@Param('accountId') accountId: string, @Request() req) {
+  async getAccountAuths(@Param('accountId') accountId: string) {
     const auths = await this.authService.getAccountAuths(accountId);
     return {
       success: true,
@@ -93,7 +92,7 @@ export class SocialMediaAuthController {
   @Get('accounts/:accountId/active-auth')
   @ApiOperation({ summary: 'Get active authentication for account' })
   @ApiResponse({ status: 200, description: 'Active authentication retrieved successfully' })
-  async getActiveAuth(@Param('accountId') accountId: string, @Request() req) {
+  async getActiveAuth(@Param('accountId') accountId: string) {
     const auth = await this.authService.getActiveAuth(accountId);
     return {
       success: true,
@@ -105,7 +104,7 @@ export class SocialMediaAuthController {
   @Get('auths/:authId')
   @ApiOperation({ summary: 'Get specific authentication record' })
   @ApiResponse({ status: 200, description: 'Authentication record retrieved successfully' })
-  async getAuth(@Param('authId') authId: string, @Request() req) {
+  async getAuth(@Param('authId') authId: string) {
     const auth = await this.authService.getAuth(authId);
     return {
       success: true,
@@ -117,7 +116,7 @@ export class SocialMediaAuthController {
   @Get('accounts/:accountId/access-token')
   @ApiOperation({ summary: 'Get valid access token for account' })
   @ApiResponse({ status: 200, description: 'Access token retrieved successfully' })
-  async getValidAccessToken(@Param('accountId') accountId: string, @Request() req) {
+  async getValidAccessToken(@Param('accountId') accountId: string) {
     const accessToken = await this.authService.getValidAccessToken(accountId);
     return {
       success: true,
@@ -129,7 +128,7 @@ export class SocialMediaAuthController {
   @Get('accounts/:accountId/is-authenticated')
   @ApiOperation({ summary: 'Check if account is authenticated' })
   @ApiResponse({ status: 200, description: 'Authentication status retrieved successfully' })
-  async isAccountAuthenticated(@Param('accountId') accountId: string, @Request() req) {
+  async isAccountAuthenticated(@Param('accountId') accountId: string) {
     const isAuthenticated = await this.authService.isAccountAuthenticated(accountId);
     return {
       success: true,
@@ -141,7 +140,7 @@ export class SocialMediaAuthController {
   @Get('accounts/:accountId/permissions')
   @ApiOperation({ summary: 'Get account permissions' })
   @ApiResponse({ status: 200, description: 'Permissions retrieved successfully' })
-  async getAccountPermissions(@Param('accountId') accountId: string, @Request() req) {
+  async getAccountPermissions(@Param('accountId') accountId: string) {
     const permissions = await this.authService.getAccountPermissions(accountId);
     return {
       success: true,

@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { SocialAdCampaignService } from '../services/social-ad-campaign.service';
 import { UserWorkspacePermissionGuard } from '../../rbac/guards/user-workspace-permission.guard';
 import { RequirePermission } from '../../../shared/decorators/permission.decorator';
+import { CurrentUserId } from '../../../shared/decorators/current-user-id.decorator';
 import { Resource } from '../../../shared/enums/resource.enum';
 import { Action } from '../../../shared/enums/action.enum';
 import { CampaignStatus, CampaignObjective, BudgetType } from '../entities/social-ad-campaign.entity';
@@ -18,7 +19,7 @@ export class SocialAdCampaignController {
   @ApiOperation({ summary: 'Create a new social media campaign' })
   @ApiResponse({ status: 201, description: 'Campaign created successfully' })
   @RequirePermission(Resource.WORKSPACE, Action.CREATE)
-  async createCampaign(@Param('workspaceId') workspaceId: string, @Body() createCampaignDto: any, @Request() req) {
+  async createCampaign(@Param('workspaceId') workspaceId: string, @Body() createCampaignDto: any) {
     const campaign = await this.campaignService.createCampaign({
       ...createCampaignDto,
       workspaceId,
@@ -34,7 +35,7 @@ export class SocialAdCampaignController {
   @ApiOperation({ summary: 'Get workspace campaigns' })
   @ApiResponse({ status: 200, description: 'Campaigns retrieved successfully' })
   @RequirePermission(Resource.WORKSPACE, Action.VIEW)
-  async getCampaigns(@Param('workspaceId') workspaceId: string, @Query('accountId') accountId?: string, @Request() req?) {
+  async getCampaigns(@Param('workspaceId') workspaceId: string, @Query('accountId') accountId?: string) {
     const campaigns = await this.campaignService.getCampaigns(workspaceId, accountId);
     return {
       success: true,
@@ -47,7 +48,7 @@ export class SocialAdCampaignController {
   @ApiOperation({ summary: 'Get specific campaign details' })
   @ApiResponse({ status: 200, description: 'Campaign details retrieved successfully' })
   @RequirePermission(Resource.WORKSPACE, Action.VIEW)
-  async getCampaign(@Param('workspaceId') workspaceId: string, @Param('campaignId') campaignId: string, @Request() req) {
+  async getCampaign(@Param('workspaceId') workspaceId: string, @Param('campaignId') campaignId: string) {
     const campaign = await this.campaignService.getCampaign(campaignId, workspaceId);
     return {
       success: true,
@@ -59,8 +60,8 @@ export class SocialAdCampaignController {
   @Put(':campaignId')
   @ApiOperation({ summary: 'Update campaign' })
   @ApiResponse({ status: 200, description: 'Campaign updated successfully' })
-  async updateCampaign(@Param('campaignId') campaignId: string, @Body() updateCampaignDto: any, @Request() req) {
-    const campaign = await this.campaignService.updateCampaign(campaignId, req.user.id, updateCampaignDto);
+  async updateCampaign(@Param('campaignId') campaignId: string, @Body() updateCampaignDto: any, @CurrentUserId() userId: string) {
+    const campaign = await this.campaignService.updateCampaign(campaignId, userId, updateCampaignDto);
     return {
       success: true,
       data: campaign,
@@ -71,8 +72,8 @@ export class SocialAdCampaignController {
   @Delete(':campaignId')
   @ApiOperation({ summary: 'Delete campaign' })
   @ApiResponse({ status: 200, description: 'Campaign deleted successfully' })
-  async deleteCampaign(@Param('campaignId') campaignId: string, @Request() req) {
-    await this.campaignService.deleteCampaign(campaignId, req.user.id);
+  async deleteCampaign(@Param('campaignId') campaignId: string, @CurrentUserId() userId: string) {
+    await this.campaignService.deleteCampaign(campaignId, userId);
     return {
       success: true,
       message: 'Campaign deleted successfully',
@@ -82,8 +83,8 @@ export class SocialAdCampaignController {
   @Post(':campaignId/pause')
   @ApiOperation({ summary: 'Pause campaign' })
   @ApiResponse({ status: 200, description: 'Campaign paused successfully' })
-  async pauseCampaign(@Param('campaignId') campaignId: string, @Request() req) {
-    await this.campaignService.pauseCampaign(campaignId, req.user.id);
+  async pauseCampaign(@Param('campaignId') campaignId: string, @CurrentUserId() userId: string) {
+    await this.campaignService.pauseCampaign(campaignId, userId);
     return {
       success: true,
       message: 'Campaign paused successfully',
@@ -93,8 +94,8 @@ export class SocialAdCampaignController {
   @Post(':campaignId/resume')
   @ApiOperation({ summary: 'Resume campaign' })
   @ApiResponse({ status: 200, description: 'Campaign resumed successfully' })
-  async resumeCampaign(@Param('campaignId') campaignId: string, @Request() req) {
-    await this.campaignService.resumeCampaign(campaignId, req.user.id);
+  async resumeCampaign(@Param('campaignId') campaignId: string, @CurrentUserId() userId: string) {
+    await this.campaignService.resumeCampaign(campaignId, userId);
     return {
       success: true,
       message: 'Campaign resumed successfully',
@@ -108,11 +109,11 @@ export class SocialAdCampaignController {
     @Param('campaignId') campaignId: string,
     @Query('startDate') startDate: string,
     @Query('endDate') endDate: string,
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const performance = await this.campaignService.getCampaignPerformance(
       campaignId,
-      req.user.id,
+      userId,
       new Date(startDate),
       new Date(endDate),
     );
@@ -126,8 +127,8 @@ export class SocialAdCampaignController {
   @Post(':campaignId/sync-performance')
   @ApiOperation({ summary: 'Sync campaign performance data from platform' })
   @ApiResponse({ status: 200, description: 'Performance data synced successfully' })
-  async syncCampaignPerformance(@Param('campaignId') campaignId: string, @Request() req) {
-    const performance = await this.campaignService.syncCampaignPerformance(campaignId, req.user.id);
+  async syncCampaignPerformance(@Param('campaignId') campaignId: string, @CurrentUserId() userId: string) {
+    const performance = await this.campaignService.syncCampaignPerformance(campaignId, userId);
     return {
       success: true,
       data: performance,
@@ -138,8 +139,8 @@ export class SocialAdCampaignController {
   @Get(':campaignId/ads')
   @ApiOperation({ summary: 'Get campaign ads' })
   @ApiResponse({ status: 200, description: 'Campaign ads retrieved successfully' })
-  async getCampaignAds(@Param('campaignId') campaignId: string, @Request() req) {
-    const ads = await this.campaignService.getCampaignAds(campaignId, req.user.id);
+  async getCampaignAds(@Param('campaignId') campaignId: string, @CurrentUserId() userId: string) {
+    const ads = await this.campaignService.getCampaignAds(campaignId, userId);
     return {
       success: true,
       data: ads,
@@ -150,8 +151,8 @@ export class SocialAdCampaignController {
   @Post(':campaignId/ads/:adId')
   @ApiOperation({ summary: 'Add ad to campaign' })
   @ApiResponse({ status: 200, description: 'Ad added to campaign successfully' })
-  async addAdToCampaign(@Param('campaignId') campaignId: string, @Param('adId') adId: string, @Request() req) {
-    const ad = await this.campaignService.addAdToCampaign(campaignId, adId, req.user.id);
+  async addAdToCampaign(@Param('campaignId') campaignId: string, @Param('adId') adId: string, @CurrentUserId() userId: string) {
+    const ad = await this.campaignService.addAdToCampaign(campaignId, adId, userId);
     return {
       success: true,
       data: ad,
@@ -162,8 +163,8 @@ export class SocialAdCampaignController {
   @Delete(':campaignId/ads/:adId')
   @ApiOperation({ summary: 'Remove ad from campaign' })
   @ApiResponse({ status: 200, description: 'Ad removed from campaign successfully' })
-  async removeAdFromCampaign(@Param('campaignId') campaignId: string, @Param('adId') adId: string, @Request() req) {
-    const ad = await this.campaignService.removeAdFromCampaign(campaignId, adId, req.user.id);
+  async removeAdFromCampaign(@Param('campaignId') campaignId: string, @Param('adId') adId: string, @CurrentUserId() userId: string) {
+    const ad = await this.campaignService.removeAdFromCampaign(campaignId, adId, userId);
     return {
       success: true,
       data: ad,
@@ -174,8 +175,8 @@ export class SocialAdCampaignController {
   @Get(':campaignId/stats')
   @ApiOperation({ summary: 'Get campaign statistics' })
   @ApiResponse({ status: 200, description: 'Campaign statistics retrieved successfully' })
-  async getCampaignStats(@Param('campaignId') campaignId: string, @Request() req) {
-    const stats = await this.campaignService.getCampaignStats(campaignId, req.user.id);
+  async getCampaignStats(@Param('campaignId') campaignId: string, @CurrentUserId() userId: string) {
+    const stats = await this.campaignService.getCampaignStats(campaignId, userId);
     return {
       success: true,
       data: stats,

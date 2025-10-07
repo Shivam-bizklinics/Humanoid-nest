@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UserWorkspacePermissionGuard } from '../../rbac/guards/user-workspace-permission.guard';
 import { RequirePermission } from '../../../shared/decorators/permission.decorator';
+import { CurrentUserId } from '../../../shared/decorators/current-user-id.decorator';
 import { WorkspaceService } from '../services/workspace.service';
 import { CreateWorkspaceDto, UpdateWorkspaceDto, AddUserToWorkspaceDto, WorkspaceResponseDto } from '../dto/workspace.dto';
 import { Resource } from '../../../shared/enums/resource.enum';
@@ -18,8 +19,8 @@ export class WorkspaceController {
   @Get()
   @ApiOperation({ summary: 'Get all workspaces user has access to' })
   @ApiResponse({ status: 200, description: 'List of workspaces' })
-  async getWorkspaces(@Request() req) {
-    const workspaces = await this.workspaceService.getUserWorkspaces(req.user.id);
+  async getWorkspaces(@CurrentUserId() userId: string) {
+    const workspaces = await this.workspaceService.getUserWorkspaces(userId);
     return {
       success: true,
       data: workspaces,
@@ -51,11 +52,11 @@ export class WorkspaceController {
   @RequirePermission(Resource.WORKSPACE, Action.CREATE)
   @ApiOperation({ summary: 'Create new workspace' })
   @ApiResponse({ status: 201, description: 'Workspace created' })
-  async createWorkspace(@Body() createWorkspaceDto: CreateWorkspaceDto, @Request() req) {
+  async createWorkspace(@Body() createWorkspaceDto: CreateWorkspaceDto, @CurrentUserId() userId: string) {
     const workspace = await this.workspaceService.createWorkspace(
       createWorkspaceDto.name,
       createWorkspaceDto.description,
-      req.user.id,
+      userId,
       createWorkspaceDto.brandName,
       createWorkspaceDto.brandWebsite,
       createWorkspaceDto.brandDescription,
@@ -76,7 +77,7 @@ export class WorkspaceController {
   async updateWorkspace(
     @Param('workspaceId') workspaceId: string,
     @Body() updateWorkspaceDto: UpdateWorkspaceDto,
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const workspace = await this.workspaceService.updateWorkspace(
       workspaceId,
@@ -89,7 +90,7 @@ export class WorkspaceController {
         brandDescription: updateWorkspaceDto.brandDescription,
         brandLogo: updateWorkspaceDto.brandLogo,
       },
-      req.user.id
+      userId
     );
 
     return {
@@ -126,13 +127,13 @@ export class WorkspaceController {
   async addUserToWorkspace(
     @Param('workspaceId') workspaceId: string,
     @Body() addUserDto: AddUserToWorkspaceDto,
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const userWorkspace = await this.workspaceService.addUserToWorkspace(
       workspaceId,
       addUserDto.userId,
       addUserDto.accessLevel,
-      req.user.id
+      userId
     );
 
     return {
@@ -190,13 +191,13 @@ export class WorkspaceController {
     @Param('workspaceId') workspaceId: string,
     @Param('userId') userId: string,
     @Body() body: { accessLevel: string },
-    @Request() req,
+    @CurrentUserId() currentUserId: string,
   ) {
     const userWorkspace = await this.workspaceService.updateUserAccessLevel(
       workspaceId,
       userId,
       body.accessLevel as any,
-      req.user.id
+      currentUserId
     );
 
     return {
@@ -213,12 +214,12 @@ export class WorkspaceController {
   async updateWorkspaceSetupStatus(
     @Param('workspaceId') workspaceId: string,
     @Body() body: { setupStatus: WorkspaceSetupStatus },
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const workspace = await this.workspaceService.updateWorkspaceSetupStatus(
       workspaceId,
       body.setupStatus,
-      req.user.id
+      userId
     );
 
     return {
@@ -234,11 +235,11 @@ export class WorkspaceController {
   @ApiResponse({ status: 200, description: 'Workspace setup completed' })
   async completeWorkspaceSetup(
     @Param('workspaceId') workspaceId: string,
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const workspace = await this.workspaceService.completeWorkspaceSetup(
       workspaceId,
-      req.user.id
+      userId
     );
 
     return {
@@ -270,11 +271,11 @@ export class WorkspaceController {
   @ApiResponse({ status: 200, description: 'Workspace setup completed with validation' })
   async completeWorkspaceSetupWithValidation(
     @Param('workspaceId') workspaceId: string,
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const workspace = await this.workspaceService.completeWorkspaceSetupWithValidation(
       workspaceId,
-      req.user.id
+      userId
     );
 
     return {

@@ -13,6 +13,7 @@ import { UserWorkspacePermissionController } from './controllers/user-workspace-
 import { PermissionSeederService } from './services/permission-seeder.service';
 import { PermissionSeederController } from './controllers/permission-seeder.controller';
 import { UserRepository } from '../authentication/repositories/user.repository';
+import { AuthService } from '../../shared/services/auth.service';
 
 @Module({
   imports: [
@@ -37,12 +38,14 @@ import { UserRepository } from '../authentication/repositories/user.repository';
     UserWorkspacePermissionGuard,
     PermissionSeederService,
     UserRepository,
+    AuthService,
   ],
   exports: [
     UserWorkspacePermissionService,
     UserWorkspacePermissionGuard,
     PermissionSeederService,
     UserRepository,
+    AuthService,
     JwtModule,
   ],
 })

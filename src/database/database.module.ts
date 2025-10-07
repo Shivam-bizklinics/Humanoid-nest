@@ -22,6 +22,7 @@ import { AgencyAccount } from '../modules/social-ads/entities/agency-account.ent
 import { AgencyAuth } from '../modules/social-ads/entities/agency-auth.entity';
 import { BrandQuestion } from '../modules/workspaces/entities/brand-question.entity';
 import { BrandQuestionResponse } from '../modules/workspaces/entities/brand-question-response.entity';
+import { FileUpload } from '../modules/file-upload/entities/file-upload.entity';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { BrandQuestionResponse } from '../modules/workspaces/entities/brand-ques
                   AgencyAuth,
                   BrandQuestion,
                   BrandQuestionResponse,
+                  FileUpload,
                 ],
         synchronize: configService.get('NODE_ENV') === 'development',
         logging: configService.get('NODE_ENV') === 'development' ? ['query', 'error'] : ['error'],

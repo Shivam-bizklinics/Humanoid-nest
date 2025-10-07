@@ -10,6 +10,7 @@ import { BrandQuestionService } from './services/brand-question.service';
 import { UserWorkspace } from '../rbac/entities/user-workspace.entity';
 import { User } from '../authentication/entities/user.entity';
 import { RbacModule } from '../rbac/rbac.module';
+import { FileUploadModule } from '../file-upload/file-upload.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { RbacModule } from '../rbac/rbac.module';
       BrandQuestion,
       BrandQuestionResponse
     ]),
-    RbacModule
+    RbacModule,
+    FileUploadModule
   ],
   controllers: [WorkspaceController, BrandQuestionController],
   providers: [WorkspaceService, BrandQuestionService],

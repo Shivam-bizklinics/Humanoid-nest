@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { CurrentUserId } from '../../../shared/decorators/current-user-id.decorator';
 import { AgencyAccountService } from '../services/agency-account.service';
 import { PlatformType } from '../entities/social-media-platform.entity';
 import { AgencyAccount, AgencyAccountType } from '../entities/agency-account.entity';
@@ -25,10 +26,10 @@ export class AgencyAccountController {
     timezone?: string;
     currency?: string;
     capabilities?: string[];
-  }, @Request() req) {
+  }, @CurrentUserId() userId: string) {
     const agencyAccount = await this.agencyAccountService.createAgencyAccount({
       ...createDto,
-      userId: req.user.id,
+      userId: userId,
     });
 
     return {
@@ -41,8 +42,8 @@ export class AgencyAccountController {
   @Get()
   @ApiOperation({ summary: 'Get user agency accounts' })
   @ApiResponse({ status: 200, description: 'Agency accounts retrieved successfully' })
-  async getUserAgencyAccounts(@Request() req) {
-    const accounts = await this.agencyAccountService.getUserAgencyAccounts(req.user.id);
+  async getUserAgencyAccounts(@CurrentUserId() userId: string) {
+    const accounts = await this.agencyAccountService.getUserAgencyAccounts(userId);
     return {
       success: true,
       data: accounts,
@@ -53,7 +54,7 @@ export class AgencyAccountController {
   @Get(':agencyAccountId')
   @ApiOperation({ summary: 'Get agency account details' })
   @ApiResponse({ status: 200, description: 'Agency account details retrieved successfully' })
-  async getAgencyAccount(@Param('agencyAccountId') agencyAccountId: string, @Request() req) {
+  async getAgencyAccount(@Param('agencyAccountId') agencyAccountId: string) {
     const account = await this.agencyAccountService.getAgencyAccount(agencyAccountId);
     return {
       success: true,
@@ -68,7 +69,6 @@ export class AgencyAccountController {
   async updateAgencyAccount(
     @Param('agencyAccountId') agencyAccountId: string,
     @Body() updateDto: Partial<AgencyAccount>,
-    @Request() req,
   ) {
     const account = await this.agencyAccountService.updateAgencyAccount(agencyAccountId, updateDto);
     return {
@@ -81,7 +81,7 @@ export class AgencyAccountController {
   @Delete(':agencyAccountId')
   @ApiOperation({ summary: 'Delete agency account' })
   @ApiResponse({ status: 200, description: 'Agency account deleted successfully' })
-  async deleteAgencyAccount(@Param('agencyAccountId') agencyAccountId: string, @Request() req) {
+  async deleteAgencyAccount(@Param('agencyAccountId') agencyAccountId: string) {
     await this.agencyAccountService.deleteAgencyAccount(agencyAccountId);
     return {
       success: true,
@@ -94,7 +94,7 @@ export class AgencyAccountController {
   @Post(':agencyAccountId/auth/initiate')
   @ApiOperation({ summary: 'Initiate OAuth flow for agency account' })
   @ApiResponse({ status: 200, description: 'OAuth flow initiated successfully' })
-  async initiateAgencyAuth(@Param('agencyAccountId') agencyAccountId: string, @Request() req) {
+  async initiateAgencyAuth(@Param('agencyAccountId') agencyAccountId: string) {
     const { authUrl, state } = await this.agencyAccountService.initiateAgencyAuth(agencyAccountId);
     return {
       success: true,
@@ -109,7 +109,6 @@ export class AgencyAccountController {
   async completeAgencyAuth(
     @Param('agencyAccountId') agencyAccountId: string,
     @Body() body: { code: string; state: string },
-    @Request() req,
   ) {
     const auth = await this.agencyAccountService.completeAgencyAuth(
       agencyAccountId,
@@ -126,7 +125,7 @@ export class AgencyAccountController {
   @Get(':agencyAccountId/is-authenticated')
   @ApiOperation({ summary: 'Check if agency account is authenticated' })
   @ApiResponse({ status: 200, description: 'Authentication status retrieved successfully' })
-  async isAgencyAuthenticated(@Param('agencyAccountId') agencyAccountId: string, @Request() req) {
+  async isAgencyAuthenticated(@Param('agencyAccountId') agencyAccountId: string) {
     const isAuthenticated = await this.agencyAccountService.isAgencyAuthenticated(agencyAccountId);
     return {
       success: true,
@@ -138,7 +137,7 @@ export class AgencyAccountController {
   @Post(':agencyAccountId/sync')
   @ApiOperation({ summary: 'Sync agency account data from platform' })
   @ApiResponse({ status: 200, description: 'Agency account synced successfully' })
-  async syncAgencyAccount(@Param('agencyAccountId') agencyAccountId: string, @Request() req) {
+  async syncAgencyAccount(@Param('agencyAccountId') agencyAccountId: string) {
     const account = await this.agencyAccountService.syncAgencyAccount(agencyAccountId);
     return {
       success: true,
@@ -155,12 +154,12 @@ export class AgencyAccountController {
   async linkAccountToAgency(
     @Param('agencyAccountId') agencyAccountId: string,
     @Param('socialMediaAccountId') socialMediaAccountId: string,
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const account = await this.agencyAccountService.linkAccountToAgency(
       socialMediaAccountId,
       agencyAccountId,
-      req.user.id,
+      userId,
     );
     return {
       success: true,
@@ -175,11 +174,11 @@ export class AgencyAccountController {
   async unlinkAccountFromAgency(
     @Param('agencyAccountId') agencyAccountId: string,
     @Param('socialMediaAccountId') socialMediaAccountId: string,
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const account = await this.agencyAccountService.unlinkAccountFromAgency(
       socialMediaAccountId,
-      req.user.id,
+      userId,
     );
     return {
       success: true,
@@ -191,7 +190,7 @@ export class AgencyAccountController {
   @Get(':agencyAccountId/managed-accounts')
   @ApiOperation({ summary: 'Get all accounts managed by this agency' })
   @ApiResponse({ status: 200, description: 'Managed accounts retrieved successfully' })
-  async getAgencyManagedAccounts(@Param('agencyAccountId') agencyAccountId: string, @Request() req) {
+  async getAgencyManagedAccounts(@Param('agencyAccountId') agencyAccountId: string) {
     const accounts = await this.agencyAccountService.getAgencyManagedAccounts(agencyAccountId);
     return {
       success: true,
@@ -203,7 +202,7 @@ export class AgencyAccountController {
   @Get('social-account/:socialMediaAccountId/agency')
   @ApiOperation({ summary: 'Get agency managing a social media account' })
   @ApiResponse({ status: 200, description: 'Agency account retrieved successfully' })
-  async getAccountAgency(@Param('socialMediaAccountId') socialMediaAccountId: string, @Request() req) {
+  async getAccountAgency(@Param('socialMediaAccountId') socialMediaAccountId: string) {
     const agency = await this.agencyAccountService.getAccountAgency(socialMediaAccountId);
     return {
       success: true,
@@ -217,7 +216,7 @@ export class AgencyAccountController {
   @Get(':agencyAccountId/accessible-pages')
   @ApiOperation({ summary: 'Get all Facebook Pages accessible by this agency in Business Manager' })
   @ApiResponse({ status: 200, description: 'Accessible pages retrieved successfully' })
-  async getAgencyAccessiblePages(@Param('agencyAccountId') agencyAccountId: string, @Request() req) {
+  async getAgencyAccessiblePages(@Param('agencyAccountId') agencyAccountId: string) {
     const pages = await this.agencyAccountService.getAgencyAccessiblePages(agencyAccountId);
     return {
       success: true,
@@ -229,7 +228,7 @@ export class AgencyAccountController {
   @Get(':agencyAccountId/accessible-ad-accounts')
   @ApiOperation({ summary: 'Get all ad accounts accessible by this agency in Business Manager' })
   @ApiResponse({ status: 200, description: 'Accessible ad accounts retrieved successfully' })
-  async getAgencyAccessibleAdAccounts(@Param('agencyAccountId') agencyAccountId: string, @Request() req) {
+  async getAgencyAccessibleAdAccounts(@Param('agencyAccountId') agencyAccountId: string) {
     const adAccounts = await this.agencyAccountService.getAgencyAccessibleAdAccounts(agencyAccountId);
     return {
       success: true,

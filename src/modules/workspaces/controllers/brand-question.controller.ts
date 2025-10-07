@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UserWorkspacePermissionGuard } from '../../rbac/guards/user-workspace-permission.guard';
 import { RequirePermission } from '../../../shared/decorators/permission.decorator';
+import { CurrentUserId } from '../../../shared/decorators/current-user-id.decorator';
 import { Resource } from '../../../shared/enums/resource.enum';
 import { Action } from '../../../shared/enums/action.enum';
 import { BrandQuestionService } from '../services/brand-question.service';
@@ -25,8 +26,8 @@ export class BrandQuestionController {
   @RequirePermission(Resource.WORKSPACE, Action.CREATE) // Admin only
   @ApiOperation({ summary: 'Create a new brand question' })
   @ApiResponse({ status: 201, description: 'Brand question created successfully' })
-  async createQuestion(@Body() createDto: CreateBrandQuestionDto, @Request() req) {
-    const question = await this.brandQuestionService.createQuestion(createDto, req.user.id);
+  async createQuestion(@Body() createDto: CreateBrandQuestionDto, @CurrentUserId() userId: string) {
+    const question = await this.brandQuestionService.createQuestion(createDto, userId);
     return {
       success: true,
       data: question,
@@ -41,9 +42,9 @@ export class BrandQuestionController {
   async updateQuestion(
     @Param('questionId') questionId: string,
     @Body() updateDto: UpdateBrandQuestionDto,
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
-    const question = await this.brandQuestionService.updateQuestion(questionId, updateDto, req.user.id);
+    const question = await this.brandQuestionService.updateQuestion(questionId, updateDto, userId);
     return {
       success: true,
       data: question,
@@ -123,12 +124,12 @@ export class BrandQuestionController {
   async submitQuestionnaire(
     @Param('workspaceId') workspaceId: string,
     @Body() submitDto: SubmitBrandQuestionnaireDto,
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const result = await this.brandQuestionService.submitQuestionnaire(
       workspaceId,
       submitDto.responses,
-      req.user.id,
+      userId,
     );
 
     return {
@@ -160,13 +161,13 @@ export class BrandQuestionController {
     @Param('workspaceId') workspaceId: string,
     @Param('questionId') questionId: string,
     @Body() body: { answer: string; metadata?: any },
-    @Request() req,
+    @CurrentUserId() userId: string,
   ) {
     const response = await this.brandQuestionService.updateResponse(
       workspaceId,
       questionId,
       body.answer,
-      req.user.id,
+      userId,
     );
 
     return {
