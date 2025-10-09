@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { User } from '../../authentication/entities/user.entity';
 import { Workspace } from '../../workspaces/entities/workspace.entity';
 import { BaseEntity } from '../../../shared/interfaces/base.interface';
+import { CampaignType, SocialPlatform, ContentType } from '../../../shared/enums/campaign.enum';
 
 export enum CampaignStatus {
   DRAFT = 'draft',
@@ -41,6 +42,58 @@ export class Campaign implements BaseEntity {
   @Column('uuid', { nullable: true })
   createdBy: string;
 
+  // New campaign fields
+  @Column({
+    type: 'enum',
+    enum: CampaignType,
+    nullable: true,
+  })
+  campaignType?: CampaignType;
+
+  @Column({
+    type: 'json',
+    nullable: true,
+  })
+  socialPlatforms?: SocialPlatform[];
+
+  @Column({ default: 0 })
+  totalPosts: number;
+
+  @Column({
+    type: 'json',
+    nullable: true,
+  })
+  postCounts?: {
+    image?: number;
+    gif?: number;
+    carousel?: number;
+    story?: number;
+    video?: number;
+    reel?: number;
+    igtv?: number;
+    live?: number;
+    poll?: number;
+    quiz?: number;
+    text?: number;
+    link?: number;
+  };
+
+  @Column({
+    type: 'enum',
+    enum: ContentType,
+    nullable: true,
+  })
+  contentType?: ContentType;
+
+  @Column({ nullable: true })
+  thingsToPromote?: string;
+
+  @Column({
+    type: 'json',
+    nullable: true,
+  })
+  contentPillars?: string[]; // Array of content pillar IDs or names
+
   @ManyToOne(() => Workspace)
   @JoinColumn({ name: 'workspaceId' })
   workspace: Workspace;
@@ -65,4 +118,8 @@ export class Campaign implements BaseEntity {
   @ManyToOne(() => User)
   @JoinColumn({ name: 'updatedBy' })
   updater?: User;
+
+  // Relations
+  @OneToMany('Post', 'campaign')
+  posts: any[];
 }

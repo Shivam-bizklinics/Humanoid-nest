@@ -8,6 +8,10 @@ import { UserWorkspacePermission } from '../modules/rbac/entities/user-workspace
 import { ImpersonationSession } from '../modules/rbac/entities/impersonation-session.entity';
 import { Workspace } from '../modules/workspaces/entities/workspace.entity';
 import { Campaign } from '../modules/campaigns/entities/campaign.entity';
+import { Post } from '../modules/campaigns/entities/post.entity';
+import { ContentPillar } from '../modules/campaigns/entities/content-pillar.entity';
+import { CampaignQuestion } from '../modules/campaigns/entities/campaign-question.entity';
+import { CampaignQuestionResponse } from '../modules/campaigns/entities/campaign-question-response.entity';
 import { Design } from '../modules/designer/entities/design.entity';
 import { Publication } from '../modules/publisher/entities/publication.entity';
 import { Approval } from '../modules/approval-workflow/entities/approval.entity';
@@ -44,6 +48,10 @@ import { FileUpload } from '../modules/file-upload/entities/file-upload.entity';
                   ImpersonationSession,
                   Workspace,
                   Campaign,
+                  Post,
+                  ContentPillar,
+                  CampaignQuestion,
+                  CampaignQuestionResponse,
                   Design,
                   Publication,
                   Approval,
