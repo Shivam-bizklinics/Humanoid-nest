@@ -38,10 +38,15 @@ export class CampaignController {
   @ApiOperation({ summary: 'Create a new campaign' })
   @ApiResponse({ status: 201, description: 'Campaign created successfully' })
   async createCampaign(@Body() createCampaignDto: CreateCampaignDto, @CurrentUserId() userId: string) {
-    const campaign = await this.campaignService.createCampaign({
+    // Convert date strings to Date objects if necessary
+    const payload = {
       ...createCampaignDto,
       createdBy: userId,
-    });
+      startDate: createCampaignDto.startDate ? new Date(createCampaignDto.startDate) : undefined,
+      endDate: createCampaignDto.endDate ? new Date(createCampaignDto.endDate) : undefined,
+    };
+
+    const campaign = await this.campaignService.createCampaign(payload);
 
     return {
       success: true,
@@ -79,10 +84,15 @@ export class CampaignController {
     @Body() updateCampaignDto: UpdateCampaignDto,
     @CurrentUserId() userId: string,
   ) {
-    const campaign = await this.campaignService.updateCampaign(campaignId, {
+    // Convert date strings to Date objects if necessary
+    const payload = {
       ...updateCampaignDto,
       updatedBy: userId,
-    });
+      startDate: updateCampaignDto.startDate ? new Date(updateCampaignDto.startDate) : undefined,
+      endDate: updateCampaignDto.endDate ? new Date(updateCampaignDto.endDate) : undefined,
+    };
+
+    const campaign = await this.campaignService.updateCampaign(campaignId, payload);
 
     return {
       success: true,

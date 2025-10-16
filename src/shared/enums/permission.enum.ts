@@ -33,6 +33,18 @@ export enum PermissionName {
   PUBLISHER_VIEW = 'publisher.view',
   PUBLISHER_DELETE = 'publisher.delete',
   PUBLISHER_APPROVE = 'publisher.approve',
+
+  // Agency permissions
+  AGENCY_CREATE = 'agency.create',
+  AGENCY_UPDATE = 'agency.update',
+  AGENCY_VIEW = 'agency.view',
+  AGENCY_DELETE = 'agency.delete',
+
+  // Social Media permissions
+  SOCIAL_MEDIA_CREATE = 'social_media.create',
+  SOCIAL_MEDIA_UPDATE = 'social_media.update',
+  SOCIAL_MEDIA_VIEW = 'social_media.view',
+  SOCIAL_MEDIA_DELETE = 'social_media.delete',
 }
 
 /**

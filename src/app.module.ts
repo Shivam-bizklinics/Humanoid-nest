@@ -13,6 +13,7 @@ import { PublisherModule } from './modules/publisher/publisher.module';
 import { ApprovalWorkflowModule } from './modules/approval-workflow/approval-workflow.module';
 import { SocialAdsModule } from './modules/social-ads/social-ads.module';
 import { FileUploadModule } from './modules/file-upload/file-upload.module';
+import { AgencyModule } from './modules/agency/agency.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { FileUploadModule } from './modules/file-upload/file-upload.module';
     ApprovalWorkflowModule,
     SocialAdsModule,
     FileUploadModule,
+    AgencyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

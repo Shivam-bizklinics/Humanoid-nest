@@ -4,6 +4,8 @@ export enum Resource {
   DESIGNER = 'designer',
   PUBLISHER = 'publisher',
   USER = 'user',
+  AGENCY = 'agency',
+  SOCIAL_MEDIA = 'social_media',
 }
 
 export enum ResourceDisplayName {
@@ -12,6 +14,8 @@ export enum ResourceDisplayName {
   DESIGNER = 'Designer',
   PUBLISHER = 'Publisher',
   USER = 'User',
+  AGENCY = 'Agency',
+  SOCIAL_MEDIA = 'Social Media',
 }
 
 export const RESOURCE_CONFIG = {
@@ -44,6 +48,18 @@ export const RESOURCE_CONFIG = {
     description: 'User management and impersonation',
     icon: 'person',
     color: '#8B5CF6',
+  },
+  [Resource.AGENCY]: {
+    displayName: ResourceDisplayName.AGENCY,
+    description: 'Agency and business manager administration',
+    icon: 'business',
+    color: '#06B6D4',
+  },
+  [Resource.SOCIAL_MEDIA]: {
+    displayName: ResourceDisplayName.SOCIAL_MEDIA,
+    description: 'Social media accounts and advertising management',
+    icon: 'share',
+    color: '#EC4899',
   },
 } as const;
 

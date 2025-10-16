@@ -9,10 +9,9 @@ import { CampaignQuestionService } from '../services/campaign-question.service';
 import {
   CreateCampaignQuestionDto,
   UpdateCampaignQuestionDto,
-  CampaignQuestionResponseDto,
-  SubmitQuestionnaireDto,
-  QuestionnaireProgressDto,
+  
 } from '../dto/campaign-question.dto';
+import { SubmitQuestionnaireDto } from '../dto/campaign-question-response.dto';
 
 @ApiTags('Campaign Questionnaire')
 @ApiBearerAuth()
