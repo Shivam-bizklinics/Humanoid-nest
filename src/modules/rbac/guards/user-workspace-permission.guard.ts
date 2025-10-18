@@ -13,14 +13,7 @@ export class UserWorkspacePermissionGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const permission = this.reflector.get<PermissionMetadata>(
-      PERMISSION_KEY,
-      context.getHandler(),
-    );
-
-    if (!permission) {
-      return true; // No permission required
-    }
+    
 
     const request = context.switchToHttp().getRequest();
     
@@ -34,6 +27,14 @@ export class UserWorkspacePermissionGuard implements CanActivate {
     // Attach user to request for later use
     request.user = user;
 
+    const permission = this.reflector.get<PermissionMetadata>(
+      PERMISSION_KEY,
+      context.getHandler(),
+    );
+
+    if (!permission) {
+      return true; // No permission required
+    }
     // Get workspace ID from request parameters
     const workspaceId = this.getWorkspaceIdFromRequest(request, permission);
     

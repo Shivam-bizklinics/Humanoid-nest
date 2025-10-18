@@ -15,8 +15,8 @@ export class UserWorkspacePermission implements BaseEntity {
   @Column('uuid')
   workspaceId: string;
 
-  @Column('uuid')
-  permissionId: string;
+  @Column('uuid', { array: true, default: [] })
+  permissionIds: string[];
 
   @Column({ default: true })
   isActive: boolean;
@@ -28,10 +28,6 @@ export class UserWorkspacePermission implements BaseEntity {
   @ManyToOne(() => Workspace)
   @JoinColumn({ name: 'workspaceId' })
   workspace: Workspace;
-
-  @ManyToOne(() => Permission)
-  @JoinColumn({ name: 'permissionId' })
-  permission: Permission;
 
   @CreateDateColumn()
   createdAt: Date;

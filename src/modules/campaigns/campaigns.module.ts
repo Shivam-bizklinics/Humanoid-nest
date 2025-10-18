@@ -9,9 +9,13 @@ import { CampaignService } from './services/campaign.service';
 import { CampaignQuestionService } from './services/campaign-question.service';
 import { CampaignController } from './controllers/campaign.controller';
 import { CampaignQuestionController } from './controllers/campaign-question.controller';
+import { RbacModule } from '../rbac/rbac.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Campaign, Post, ContentPillar, CampaignQuestion, CampaignQuestionResponse])],
+  imports: [
+    TypeOrmModule.forFeature([Campaign, Post, ContentPillar, CampaignQuestion, CampaignQuestionResponse]),
+    RbacModule,
+  ],
   controllers: [CampaignController, CampaignQuestionController],
   providers: [CampaignService, CampaignQuestionService],
   exports: [CampaignService, CampaignQuestionService],

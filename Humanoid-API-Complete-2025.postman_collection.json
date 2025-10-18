@@ -1,1188 +1,2177 @@
 {
-	"info": {
-		"_postman_id": "humanoid-api-collection-2025-complete",
-		"name": "Humanoid API - Complete Collection 2025",
-		"description": "Complete API collection for Humanoid Social Media Management Platform with Campaign Questionnaire System\n\n## Authentication\nMost endpoints require a Bearer token. First, register or login to get your JWT token.\n\n## Base URL\nLocal: http://localhost:3000\n\n## Modules\n- Authentication\n- Workspaces (with Brand Features)\n- Brand Questions\n- RBAC (Permissions & Impersonation)\n- Campaigns (Enhanced with Content Pillars)\n- Campaign Questions (NEW)\n- Posts (NEW)\n- Content Pillars (NEW)\n- Designer\n- Publisher\n- Approval Workflow\n- Social Ads\n- Agency Accounts\n- File Upload (S3)",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
-	},
-	"item": [
-		{
-			"name": "Authentication",
-			"item": [
-				{
-					"name": "Register User",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\",\n  \"name\": \"John Doe\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/auth/register",
-							"host": ["{{base_url}}"],
-							"path": ["auth", "register"]
-						},
-						"description": "Register a new user. Upon registration, user is assigned createdBy to their own ID."
-					},
-					"response": []
-				},
-				{
-					"name": "Login",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123!\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/auth/login",
-							"host": ["{{base_url}}"],
-							"path": ["auth", "login"]
-						},
-						"description": "Login user and get JWT token"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "User Impersonation",
-			"item": [
-				{
-					"name": "Start Impersonation",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"impersonatedUserId\": \"target-user-uuid\",\n  \"reason\": \"Customer support request #1234\",\n  \"expiresAt\": \"2024-01-01T12:00:00Z\",\n  \"workspaceId\": \"workspace-uuid\",\n  \"permissions\": [\"workspace.view\", \"workspace.update\"]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/impersonation/start",
-							"host": ["{{base_url}}"],
-							"path": ["impersonation", "start"]
-						},
-						"description": "Start impersonating another user. Requires user.impersonate permission."
-					},
-					"response": []
-				},
-				{
-					"name": "Stop Impersonation",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/impersonation/stop/{{session_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["impersonation", "stop", "{{session_id}}"]
-						},
-						"description": "Stop impersonation session"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Active Session",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/impersonation/active",
-							"host": ["{{base_url}}"],
-							"path": ["impersonation", "active"]
-						},
-						"description": "Get current active impersonation session"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Impersonatable Users",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/impersonation/users",
-							"host": ["{{base_url}}"],
-							"path": ["impersonation", "users"]
-						},
-						"description": "Get all users that can be impersonated"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Impersonation History",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/impersonation/history?limit=50",
-							"host": ["{{base_url}}"],
-							"path": ["impersonation", "history"],
-							"query": [
-								{
-									"key": "limit",
-									"value": "50"
-								}
-							]
-						},
-						"description": "Get impersonation history"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Workspaces",
-			"item": [
-				{
-					"name": "Create Workspace",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"My Company Workspace\",\n  \"description\": \"Main workspace for our company\",\n  \"brandName\": \"My Company\",\n  \"brandWebsite\": \"https://mycompany.com\",\n  \"brandDescription\": \"We are a leading technology company...\",\n  \"brandLogo\": \"https://mycompany.com/logo.png\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/workspaces",
-							"host": ["{{base_url}}"],
-							"path": ["workspaces"]
-						},
-						"description": "Create a new workspace with brand information"
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Workspaces",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/workspaces",
-							"host": ["{{base_url}}"],
-							"path": ["workspaces"]
-						},
-						"description": "Get all workspaces user has access to"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Workspace by ID",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/workspaces/{{workspace_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["workspaces", "{{workspace_id}}"]
-						},
-						"description": "Get workspace details by ID"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Workspace",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Updated Workspace Name\",\n  \"description\": \"Updated description\",\n  \"brandName\": \"Updated Brand Name\",\n  \"brandWebsite\": \"https://updated-brand.com\",\n  \"brandDescription\": \"Updated brand description...\",\n  \"brandLogo\": \"https://updated-brand.com/logo.png\",\n  \"setupStatus\": \"completed\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/workspaces/{{workspace_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["workspaces", "{{workspace_id}}"]
-						},
-						"description": "Update workspace details"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Brand Questions",
-			"item": [
-				{
-					"name": "Create Brand Question",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"question\": \"What is your company's mission statement?\",\n  \"description\": \"Please provide your company's mission statement\",\n  \"type\": \"textarea\",\n  \"isRequired\": true,\n  \"displayOrder\": 1,\n  \"validation\": {\n    \"minLength\": 10,\n    \"maxLength\": 500\n  }\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/brand-questions",
-							"host": ["{{base_url}}"],
-							"path": ["brand-questions"]
-						},
-						"description": "Create a new brand question"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Brand Questionnaire",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/brand-questions/workspaces/{{workspace_id}}/questionnaire",
-							"host": ["{{base_url}}"],
-							"path": ["brand-questions", "workspaces", "{{workspace_id}}", "questionnaire"]
-						},
-						"description": "Get brand questionnaire for a specific workspace"
-					},
-					"response": []
-				},
-				{
-					"name": "Submit Brand Questionnaire",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"responses\": [\n    {\n      \"questionId\": \"question-id-1\",\n      \"answer\": \"Our mission is to revolutionize technology...\"\n    },\n    {\n      \"questionId\": \"question-id-2\",\n      \"answer\": \"Technology, Innovation, Sustainability\"\n    }\n  ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/brand-questions/workspaces/{{workspace_id}}/questionnaire/submit",
-							"host": ["{{base_url}}"],
-							"path": ["brand-questions", "workspaces", "{{workspace_id}}", "questionnaire", "submit"]
-						},
-						"description": "Submit brand questionnaire responses"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Campaigns",
-			"item": [
-				{
-					"name": "Create Campaign",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Summer Sale Campaign\",\n  \"description\": \"Promoting summer collection\",\n  \"campaignType\": \"sales\",\n  \"socialPlatforms\": [\"facebook\", \"instagram\", \"linkedin\"],\n  \"totalPosts\": 15,\n  \"postCounts\": {\n    \"image\": 8,\n    \"video\": 4,\n    \"carousel\": 3\n  },\n  \"contentType\": \"promotional\",\n  \"thingsToPromote\": \"Summer clothing collection with 30% discount\",\n  \"contentPillars\": [\"educational\", \"product_services\", \"customer_stories\", \"My Custom Pillar\"],\n  \"startDate\": \"2024-06-01\",\n  \"endDate\": \"2024-08-31\",\n  \"workspaceId\": \"{{workspace_id}}\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/campaigns",
-							"host": ["{{base_url}}"],
-							"path": ["campaigns"]
-						},
-						"description": "Create a new campaign with enhanced fields"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Campaign with Pillars",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/campaigns/{{campaign_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["campaigns", "{{campaign_id}}"]
-						},
-						"description": "Get campaign with content pillars information"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Campaign",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Updated Campaign Name\",\n  \"totalPosts\": 20,\n  \"postCounts\": {\n    \"image\": 10,\n    \"video\": 6,\n    \"carousel\": 4\n  },\n  \"contentPillars\": [\"educational\", \"promotion\", \"customer_stories\"]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/campaigns/{{campaign_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["campaigns", "{{campaign_id}}"]
-						},
-						"description": "Update campaign details"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Campaign Content Pillars",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"contentPillars\": [\n    \"educational\",\n    \"promotion\",\n    \"customer_stories\",\n    \"Another Custom Pillar\"\n  ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/campaigns/{{campaign_id}}/content-pillars",
-							"host": ["{{base_url}}"],
-							"path": ["campaigns", "{{campaign_id}}", "content-pillars"]
-						},
-						"description": "Update campaign content pillars selection"
-					},
-					"response": []
-				},
-				{
-					"name": "Get System Content Pillars",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/campaigns/system-content-pillars",
-							"host": ["{{base_url}}"],
-							"path": ["campaigns", "system-content-pillars"]
-						},
-						"description": "Get all available system content pillars"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Workspace Campaigns",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/campaigns/workspace/{{workspace_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["campaigns", "workspace", "{{workspace_id}}"]
-						},
-						"description": "Get all campaigns for a workspace"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Campaign Questions (Admin)",
-			"item": [
-				{
-					"name": "Create Campaign Question",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"question\": \"What is your campaign objective?\",\n  \"description\": \"Please describe the main goal of your campaign\",\n  \"type\": \"single_select\",\n  \"options\": [\n    \"Brand Awareness\",\n    \"Lead Generation\",\n    \"Sales\",\n    \"Engagement\",\n    \"Traffic\"\n  ],\n  \"displayOrder\": 1,\n  \"isRequired\": true,\n  \"validation\": {\n    \"customMessage\": \"Please select a campaign objective\"\n  },\n  \"metadata\": {\n    \"placeholder\": \"Select an objective\",\n    \"helpText\": \"Choose the primary goal for your campaign\",\n    \"category\": \"Objective\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/campaign-questions",
-							"host": ["{{base_url}}"],
-							"path": ["campaign-questions"]
-						},
-						"description": "Create a new campaign question (Admin only)"
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Campaign Questions",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/campaign-questions",
-							"host": ["{{base_url}}"],
-							"path": ["campaign-questions"]
-						},
-						"description": "Get all campaign questions ordered by display order"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Campaign Question",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"question\": \"Updated campaign objective?\",\n  \"isRequired\": false\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/campaign-questions/{{question_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["campaign-questions", "{{question_id}}"]
-						},
-						"description": "Update a campaign question"
-					},
-					"response": []
-				},
-				{
-					"name": "Reorder Questions",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "[\n  { \"id\": \"{{question_id_1}}\", \"displayOrder\": 1 },\n  { \"id\": \"{{question_id_2}}\", \"displayOrder\": 2 },\n  { \"id\": \"{{question_id_3}}\", \"displayOrder\": 3 }\n]"
-						},
-						"url": {
-							"raw": "{{base_url}}/campaign-questions/reorder",
-							"host": ["{{base_url}}"],
-							"path": ["campaign-questions", "reorder"]
-						},
-						"description": "Reorder campaign questions"
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Campaign Question",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/campaign-questions/{{question_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["campaign-questions", "{{question_id}}"]
-						},
-						"description": "Delete a campaign question"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Campaign Questionnaire (User)",
-			"item": [
-				{
-					"name": "Get Campaign Questionnaire",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/campaign-questions/campaigns/{{campaign_id}}/questionnaire",
-							"host": ["{{base_url}}"],
-							"path": ["campaign-questions", "campaigns", "{{campaign_id}}", "questionnaire"]
-						},
-						"description": "Get campaign questionnaire with user responses"
-					},
-					"response": []
-				},
-				{
-					"name": "Submit Questionnaire Responses",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"campaignId\": \"{{campaign_id}}\",\n  \"responses\": [\n    {\n      \"questionId\": \"{{question_id_1}}\",\n      \"answer\": \"Brand Awareness\"\n    },\n    {\n      \"questionId\": \"{{question_id_2}}\",\n      \"answer\": \"Young professionals aged 25-35 interested in technology\"\n    },\n    {\n      \"questionId\": \"{{question_id_3}}\",\n      \"answer\": \"5000\",\n      \"metadata\": {\n        \"additionalNotes\": \"Budget for Q1 campaign\"\n      }\n    },\n    {\n      \"questionId\": \"{{question_id_4}}\",\n      \"answer\": \"4\",\n      \"metadata\": {\n        \"rating\": 4\n      }\n    },\n    {\n      \"questionId\": \"{{question_id_5}}\",\n      \"answer\": \"brand-guidelines.pdf\",\n      \"metadata\": {\n        \"fileUrls\": [\"https://storage.example.com/files/brand-guidelines.pdf\"]\n      }\n    }\n  ]\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/campaign-questions/campaigns/{{campaign_id}}/questionnaire/submit",
-							"host": ["{{base_url}}"],
-							"path": ["campaign-questions", "campaigns", "{{campaign_id}}", "questionnaire", "submit"]
-						},
-						"description": "Submit questionnaire responses"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Individual Response",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"answer\": \"Updated answer\",\n  \"metadata\": {\n    \"additionalNotes\": \"Updated notes\"\n  }\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/campaign-questions/campaigns/{{campaign_id}}/responses/{{question_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["campaign-questions", "campaigns", "{{campaign_id}}", "responses", "{{question_id}}"]
-						},
-						"description": "Update response for a specific question"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Questionnaire Progress",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/campaign-questions/campaigns/{{campaign_id}}/progress",
-							"host": ["{{base_url}}"],
-							"path": ["campaign-questions", "campaigns", "{{campaign_id}}", "progress"]
-						},
-						"description": "Get questionnaire completion progress"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Campaign Responses",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/campaign-questions/campaigns/{{campaign_id}}/responses",
-							"host": ["{{base_url}}"],
-							"path": ["campaign-questions", "campaigns", "{{campaign_id}}", "responses"]
-						},
-						"description": "Get all responses for a campaign"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Posts",
-			"item": [
-				{
-					"name": "Create Post",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"Product Showcase Post\",\n  \"description\": \"Highlighting our best-selling item\",\n  \"type\": \"carousel\",\n  \"campaignId\": \"{{campaign_id}}\",\n  \"contentPillarId\": \"{{pillar_id}}\",\n  \"goals\": \"Increase product awareness and drive sales\",\n  \"contentIdea\": \"Show product in different angles and use cases\",\n  \"callToAction\": \"Shop now and get 20% off!\",\n  \"hashtags\": \"#summersale #fashion #discount\",\n  \"fullCaption\": \"Discover our amazing summer collection! 🌞✨ Perfect for sunny days and warm nights. Don't miss out on this limited-time offer!\",\n  \"mediaUrls\": {\n    \"images\": [\"image1.jpg\", \"image2.jpg\", \"image3.jpg\"],\n    \"thumbnails\": [\"thumb1.jpg\", \"thumb2.jpg\", \"thumb3.jpg\"]\n  },\n  \"metadata\": {\n    \"dimensions\": { \"width\": 1080, \"height\": 1080 },\n    \"format\": \"jpg\"\n  },\n  \"displayOrder\": 1\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/posts",
-							"host": ["{{base_url}}"],
-							"path": ["posts"]
-						},
-						"description": "Create a new post for a campaign"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Campaign Posts",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/posts/campaign/{{campaign_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["posts", "campaign", "{{campaign_id}}"]
-						},
-						"description": "Get all posts for a campaign"
-					},
-					"response": []
-				},
-				{
-					"name": "Update Post",
-					"request": {
-						"method": "PUT",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"Updated Post Title\",\n  \"callToAction\": \"Visit our store today!\",\n  \"hashtags\": \"#updated #hashtags\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/posts/{{post_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["posts", "{{post_id}}"]
-						},
-						"description": "Update post details"
-					},
-					"response": []
-				},
-				{
-					"name": "Delete Post",
-					"request": {
-						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/posts/{{post_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["posts", "{{post_id}}"]
-						},
-						"description": "Delete a post"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Content Pillars",
-			"item": [
-				{
-					"name": "Create Content Pillar",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Behind the Scenes\",\n  \"description\": \"Showcasing our team and process\",\n  \"type\": \"custom\",\n  \"workspaceId\": \"{{workspace_id}}\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/content-pillars",
-							"host": ["{{base_url}}"],
-							"path": ["content-pillars"]
-						},
-						"description": "Create a custom content pillar"
-					},
-					"response": []
-				},
-				{
-					"name": "Create System Content Pillar",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Educational\",\n  \"description\": \"Educational content about our industry\",\n  \"type\": \"system\",\n  \"systemPillar\": \"educational\",\n  \"workspaceId\": \"{{workspace_id}}\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/content-pillars",
-							"host": ["{{base_url}}"],
-							"path": ["content-pillars"]
-						},
-						"description": "Create a system content pillar"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Workspace Content Pillars",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/content-pillars/workspace/{{workspace_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["content-pillars", "workspace", "{{workspace_id}}"]
-						},
-						"description": "Get all content pillars for a workspace"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "RBAC Permissions",
-			"item": [
-				{
-					"name": "Assign Permission",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"userId\": \"{{user_id}}\",\n  \"workspaceId\": \"{{workspace_id}}\",\n  \"resource\": \"workspace\",\n  \"action\": \"create\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/user-workspace-permissions/assign",
-							"host": ["{{base_url}}"],
-							"path": ["user-workspace-permissions", "assign"]
-						},
-						"description": "Assign permission to user for workspace"
-					},
-					"response": []
-				},
-				{
-					"name": "Get User Permissions",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/user-workspace-permissions/user/{{user_id}}/workspace/{{workspace_id}}",
-							"host": ["{{base_url}}"],
-							"path": ["user-workspace-permissions", "user", "{{user_id}}", "workspace", "{{workspace_id}}"]
-						},
-						"description": "Get user permissions for workspace"
-					},
-					"response": []
-				},
-				{
-					"name": "Seed Permissions",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/permission-seeder/seed",
-							"host": ["{{base_url}}"],
-							"path": ["permission-seeder", "seed"]
-						},
-						"description": "Seed all permissions in the database"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "File Upload (S3)",
-			"item": [
-				{
-					"name": "Generate Presigned URL",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"fileName\": \"brand-logo.png\",\n  \"fileType\": \"image\",\n  \"workspaceId\": \"{{workspace_id}}\",\n  \"contentType\": \"image/png\",\n  \"generateThumbnail\": true\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/file-upload/generate-presigned-url",
-							"host": ["{{base_url}}"],
-							"path": ["file-upload", "generate-presigned-url"]
-						},
-						"description": "Generate pre-signed URL for file upload"
-					},
-					"response": []
-				},
-				{
-					"name": "Confirm Upload",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"fileUploadId\": \"{{file_upload_id}}\",\n  \"originalFileName\": \"brand-logo.png\",\n  \"fileSize\": 1024000,\n  \"contentType\": \"image/png\"\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/file-upload/confirm-upload",
-							"host": ["{{base_url}}"],
-							"path": ["file-upload", "confirm-upload"]
-						},
-						"description": "Confirm file upload after successful S3 upload"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Workspace Files",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/file-upload/workspace/{{workspace_id}}?fileType=image",
-							"host": ["{{base_url}}"],
-							"path": ["file-upload", "workspace", "{{workspace_id}}"],
-							"query": [
-								{
-									"key": "fileType",
-									"value": "image"
-								}
-							]
-						},
-						"description": "Get all files for a specific workspace"
-					},
-					"response": []
-				},
-				{
-					"name": "Get Workspace Thumbnails",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/file-upload/workspace/{{workspace_id}}/thumbnails",
-							"host": ["{{base_url}}"],
-							"path": ["file-upload", "workspace", "{{workspace_id}}", "thumbnails"]
-						},
-						"description": "Get all thumbnail images for a workspace"
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Social Ads",
-			"item": [
-				{
-					"name": "Get Workspace Social Media Accounts",
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"url": {
-							"raw": "{{base_url}}/workspaces/{{workspace_id}}/social-ads/accounts",
-							"host": ["{{base_url}}"],
-							"path": ["workspaces", "{{workspace_id}}", "social-ads", "accounts"]
-						},
-						"description": "Get workspace social media accounts"
-					},
-					"response": []
-				},
-				{
-					"name": "Create Social Media Ad",
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{jwt_token}}"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"title\": \"Summer Sale Ad\",\n  \"description\": \"Promoting summer collection\",\n  \"accountId\": \"{{account_id}}\",\n  \"objective\": \"conversions\",\n  \"budget\": 1000,\n  \"targeting\": {\n    \"ageRange\": [25, 45],\n    \"interests\": [\"fashion\", \"summer\"]\n  }\n}"
-						},
-						"url": {
-							"raw": "{{base_url}}/workspaces/{{workspace_id}}/social-ads/ads",
-							"host": ["{{base_url}}"],
-							"path": ["workspaces", "{{workspace_id}}", "social-ads", "ads"]
-						},
-						"description": "Create a new social media ad"
-					},
-					"response": []
-				}
-			]
-		}
-	],
-	"variable": [
-		{
-			"key": "base_url",
-			"value": "http://localhost:3000",
-			"type": "string"
-		},
-		{
-			"key": "jwt_token",
-			"value": "",
-			"type": "string",
-			"description": "JWT token obtained from login"
-		},
-		{
-			"key": "workspace_id",
-			"value": "",
-			"type": "string",
-			"description": "Workspace ID for testing"
-		},
-		{
-			"key": "campaign_id",
-			"value": "",
-			"type": "string",
-			"description": "Campaign ID for testing"
-		},
-		{
-			"key": "post_id",
-			"value": "",
-			"type": "string",
-			"description": "Post ID for testing"
-		},
-		{
-			"key": "question_id",
-			"value": "",
-			"type": "string",
-			"description": "Question ID for testing"
-		},
-		{
-			"key": "session_id",
-			"value": "",
-			"type": "string",
-			"description": "Impersonation session ID"
-		},
-		{
-			"key": "user_id",
-			"value": "",
-			"type": "string",
-			"description": "User ID for testing"
-		},
-		{
-			"key": "file_upload_id",
-			"value": "",
-			"type": "string",
-			"description": "File upload ID for testing"
-		}
-	]
+  "info": {
+    "name": "Humanoid API Complete 2025",
+    "description": "Complete API collection for Humanoid project with all endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"timezone\": \"UTC\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"your_refresh_token_here\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/refresh"
+          }
+        },
+        {
+          "name": "Logout User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user_id_here\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/logout"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/forgot-password"
+          }
+        },
+        {
+          "name": "Verify Reset Code",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"code\": \"123456\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/verify-reset-code"
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"code\": \"123456\",\n  \"newPassword\": \"NewSecurePassword123!\"\n}"
+            },
+            "url": "{{baseUrl}}/auth/reset-password"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Workspaces",
+      "item": [
+        {
+          "name": "Get All Workspaces",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces"
+          }
+        },
+        {
+          "name": "Get Workspace by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}"
+          }
+        },
+        {
+          "name": "Create Workspace",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Workspace\",\n  \"description\": \"Workspace description\",\n  \"brandName\": \"Brand Name\",\n  \"brandWebsite\": \"https://brand.com\",\n  \"brandDescription\": \"Brand description\",\n  \"brandLogo\": \"https://logo.url\"\n}"
+            },
+            "url": "{{baseUrl}}/workspaces"
+          }
+        },
+        {
+          "name": "Update Workspace",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Workspace\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}"
+          }
+        },
+        {
+          "name": "Delete Workspace",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}"
+          }
+        },
+        {
+          "name": "Add User to Workspace",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user_id_here\",\n  \"accessLevel\": \"member\"\n}"
+            },
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/users"
+          }
+        },
+        {
+          "name": "Remove User from Workspace",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/users/{{userId}}"
+          }
+        },
+        {
+          "name": "Get Workspace Users",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/users"
+          }
+        },
+        {
+          "name": "Update User Access Level",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accessLevel\": \"admin\"\n}"
+            },
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/users/{{userId}}/access-level"
+          }
+        },
+        {
+          "name": "Update Workspace Setup Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"setupStatus\": \"completed\"\n}"
+            },
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/setup-status"
+          }
+        },
+        {
+          "name": "Complete Workspace Setup",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/complete-setup"
+          }
+        },
+        {
+          "name": "Get Workspaces by Setup Status",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/by-setup-status/{{setupStatus}}"
+          }
+        },
+        {
+          "name": "Complete Workspace Setup with Validation",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/complete-setup-validated"
+          }
+        },
+        {
+          "name": "Get Workspace Setup Progress",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/setup-progress"
+          }
+        },
+        {
+          "name": "Check if Workspace Can Complete",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/can-complete"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Campaigns",
+      "item": [
+        {
+          "name": "Get System Content Pillars",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/campaigns/system-content-pillars"
+          }
+        },
+        {
+          "name": "Create Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Campaign\",\n  \"description\": \"Campaign description\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-12-31\",\n  \"contentPillars\": [\"brand_awareness\", \"lead_generation\"]\n}"
+            },
+            "url": "{{baseUrl}}/campaigns"
+          }
+        },
+        {
+          "name": "Get Campaign by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/campaigns/{{campaignId}}"
+          }
+        },
+        {
+          "name": "Update Campaign",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Campaign\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": "{{baseUrl}}/campaigns/{{campaignId}}"
+          }
+        },
+        {
+          "name": "Update Campaign Content Pillars",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contentPillars\": [\"brand_awareness\", \"engagement\"]\n}"
+            },
+            "url": "{{baseUrl}}/campaigns/{{campaignId}}/content-pillars"
+          }
+        },
+        {
+          "name": "Delete Campaign",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/campaigns/{{campaignId}}"
+          }
+        },
+        {
+          "name": "Get Workspace Campaigns",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/campaigns/workspace/{{workspaceId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Campaign Questions",
+      "item": [
+        {
+          "name": "Create Campaign Question",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"What is your campaign objective?\",\n  \"type\": \"multiple_choice\",\n  \"options\": [\"Brand Awareness\", \"Lead Generation\", \"Sales\"],\n  \"required\": true,\n  \"displayOrder\": 1\n}"
+            },
+            "url": "{{baseUrl}}/campaign-questions"
+          }
+        },
+        {
+          "name": "Update Campaign Question",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Updated question\",\n  \"required\": false\n}"
+            },
+            "url": "{{baseUrl}}/campaign-questions/{{questionId}}"
+          }
+        },
+        {
+          "name": "Delete Campaign Question",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/campaign-questions/{{questionId}}"
+          }
+        },
+        {
+          "name": "Get All Campaign Questions",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/campaign-questions"
+          }
+        },
+        {
+          "name": "Get Campaign Question by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/campaign-questions/{{questionId}}"
+          }
+        },
+        {
+          "name": "Reorder Campaign Questions",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\"id\": \"question1\", \"displayOrder\": 1},\n  {\"id\": \"question2\", \"displayOrder\": 2}\n]"
+            },
+            "url": "{{baseUrl}}/campaign-questions/reorder"
+          }
+        },
+        {
+          "name": "Get Campaign Questionnaire",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/campaign-questions/campaigns/{{campaignId}}/questionnaire"
+          }
+        },
+        {
+          "name": "Submit Campaign Questionnaire",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"responses\": [\n    {\"questionId\": \"q1\", \"answer\": \"Brand Awareness\"},\n    {\"questionId\": \"q2\", \"answer\": \"Social Media\"}\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/campaign-questions/campaigns/{{campaignId}}/questionnaire/submit"
+          }
+        },
+        {
+          "name": "Get Campaign Questionnaire Progress",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/campaign-questions/campaigns/{{campaignId}}/progress"
+          }
+        },
+        {
+          "name": "Update Campaign Response",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answer\": \"Updated answer\",\n  \"metadata\": {}\n}"
+            },
+            "url": "{{baseUrl}}/campaign-questions/campaigns/{{campaignId}}/responses/{{questionId}}"
+          }
+        },
+        {
+          "name": "Get Campaign Responses",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/campaign-questions/campaigns/{{campaignId}}/responses"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Brand Questions",
+      "item": [
+        {
+          "name": "Create Brand Question",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"What is your brand name?\",\n  \"type\": \"text\",\n  \"required\": true,\n  \"displayOrder\": 1\n}"
+            },
+            "url": "{{baseUrl}}/brand-questions"
+          }
+        },
+        {
+          "name": "Update Brand Question",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"Updated brand question\",\n  \"required\": false\n}"
+            },
+            "url": "{{baseUrl}}/brand-questions/{{questionId}}"
+          }
+        },
+        {
+          "name": "Delete Brand Question",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/brand-questions/{{questionId}}"
+          }
+        },
+        {
+          "name": "Get All Brand Questions",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/brand-questions"
+          }
+        },
+        {
+          "name": "Get Brand Question by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/brand-questions/{{questionId}}"
+          }
+        },
+        {
+          "name": "Reorder Brand Questions",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"questionIds\": [\"q1\", \"q2\", \"q3\"]\n}"
+            },
+            "url": "{{baseUrl}}/brand-questions/reorder"
+          }
+        },
+        {
+          "name": "Get Workspace Questionnaire",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/brand-questions/workspaces/{{workspaceId}}/questionnaire"
+          }
+        },
+        {
+          "name": "Submit Workspace Questionnaire",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"responses\": [\n    {\"questionId\": \"q1\", \"answer\": \"My Brand\"},\n    {\"questionId\": \"q2\", \"answer\": \"Technology\"}\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/brand-questions/workspaces/{{workspaceId}}/questionnaire/submit"
+          }
+        },
+        {
+          "name": "Get Workspace Responses",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/brand-questions/workspaces/{{workspaceId}}/responses"
+          }
+        },
+        {
+          "name": "Update Workspace Response",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answer\": \"Updated answer\",\n  \"metadata\": {}\n}"
+            },
+            "url": "{{baseUrl}}/brand-questions/workspaces/{{workspaceId}}/responses/{{questionId}}"
+          }
+        },
+        {
+          "name": "Delete Workspace Response",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/brand-questions/workspaces/{{workspaceId}}/responses/{{questionId}}"
+          }
+        },
+        {
+          "name": "Get Workspace Completion Status",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/brand-questions/workspaces/{{workspaceId}}/completion-status"
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Workspace Permissions",
+      "item": [
+        {
+          "name": "Assign Permission",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user_id_here\",\n  \"workspaceId\": \"workspace_id_here\",\n  \"resource\": \"workspace\",\n  \"action\": \"view\"\n}"
+            },
+            "url": "{{baseUrl}}/user-workspace-permissions/assign"
+          }
+        },
+        {
+          "name": "Assign Multiple Permissions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user_id_here\",\n  \"workspaceId\": \"workspace_id_here\",\n  \"permissions\": [\n    {\"resource\": \"workspace\", \"action\": \"view\"},\n    {\"resource\": \"campaign\", \"action\": \"create\"}\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/user-workspace-permissions/assign-multiple"
+          }
+        },
+        {
+          "name": "Remove Permission",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/user-workspace-permissions/remove/{{userId}}/{{workspaceId}}?resource=workspace&action=view"
+          }
+        },
+        {
+          "name": "Remove All User Workspace Permissions",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/user-workspace-permissions/remove-all/{{userId}}/{{workspaceId}}"
+          }
+        },
+        {
+          "name": "Get User Workspace Permissions",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/user-workspace-permissions/user/{{userId}}/workspace/{{workspaceId}}"
+          }
+        },
+        {
+          "name": "Get User Workspaces with Permissions",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/user-workspace-permissions/user/{{userId}}/workspaces"
+          }
+        },
+        {
+          "name": "Get Workspace Users with Permissions",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/user-workspace-permissions/workspace/{{workspaceId}}/users"
+          }
+        },
+        {
+          "name": "Check User Permission",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/user-workspace-permissions/check/{{userId}}/{{workspaceId}}?resource=workspace&action=view"
+          }
+        },
+        {
+          "name": "Check User Workspace Access",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/user-workspace-permissions/check-workspace-access/{{userId}}/{{workspaceId}}"
+          }
+        },
+        {
+          "name": "Bulk Assign Permissions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userPermissions\": [\n    {\n      \"userId\": \"user1\",\n      \"permissions\": [{\"resource\": \"workspace\", \"action\": \"view\"}]\n    },\n    {\n      \"userId\": \"user2\",\n      \"permissions\": [{\"resource\": \"campaign\", \"action\": \"create\"}]\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/user-workspace-permissions/bulk-assign/{{workspaceId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Impersonation",
+      "item": [
+        {
+          "name": "Start Impersonation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetUserId\": \"target_user_id\",\n  \"reason\": \"Support request\"\n}"
+            },
+            "url": "{{baseUrl}}/impersonation/start"
+          }
+        },
+        {
+          "name": "Stop Impersonation",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/impersonation/stop/{{sessionId}}"
+          }
+        },
+        {
+          "name": "Get Active Session",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/impersonation/active"
+          }
+        },
+        {
+          "name": "Get Impersonation Context",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/impersonation/context"
+          }
+        },
+        {
+          "name": "Get Impersonatable Users",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/impersonation/users"
+          }
+        },
+        {
+          "name": "Get Impersonation History",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/impersonation/history?limit=50"
+          }
+        },
+        {
+          "name": "Get All Active Sessions (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/impersonation/admin/all-active"
+          }
+        },
+        {
+          "name": "Check Impersonation Permissions",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/impersonation/check-permissions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Permission Seeder",
+      "item": [
+        {
+          "name": "Seed All Permissions",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/permissions/seeder/seed-all"
+          }
+        },
+        {
+          "name": "Seed Resource Permissions",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/permissions/seeder/seed-resource/workspace"
+          }
+        },
+        {
+          "name": "Get All Permissions",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/permissions/seeder"
+          }
+        },
+        {
+          "name": "Get Permissions by Resource",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/permissions/seeder/resource/workspace"
+          }
+        },
+        {
+          "name": "Get Permissions by Action",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/permissions/seeder/action/view"
+          }
+        }
+      ]
+    },
+    {
+      "name": "File Upload",
+      "item": [
+        {
+          "name": "Generate Presigned URL",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileName\": \"image.jpg\",\n  \"fileType\": \"image/jpeg\",\n  \"fileSize\": 1024000,\n  \"workspaceId\": \"workspace_id_here\",\n  \"category\": \"brand_assets\"\n}"
+            },
+            "url": "{{baseUrl}}/file-upload/generate-presigned-url"
+          }
+        },
+        {
+          "name": "Confirm Upload",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fileUploadId\": \"upload_id_here\",\n  \"filePath\": \"path/to/file.jpg\",\n  \"fileSize\": 1024000,\n  \"metadata\": {}\n}"
+            },
+            "url": "{{baseUrl}}/file-upload/confirm-upload"
+          }
+        },
+        {
+          "name": "Get Workspace Files",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/file-upload/workspaces/{{workspaceId}}/files?fileType=image&status=ready&page=1&limit=20"
+          }
+        },
+        {
+          "name": "Get Workspace Thumbnails",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/file-upload/workspaces/{{workspaceId}}/thumbnails"
+          }
+        },
+        {
+          "name": "Get File by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/file-upload/files/{{fileId}}"
+          }
+        },
+        {
+          "name": "Update File Metadata",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Title\",\n  \"description\": \"Updated description\",\n  \"tags\": [\"tag1\", \"tag2\"]\n}"
+            },
+            "url": "{{baseUrl}}/file-upload/files/{{fileId}}"
+          }
+        },
+        {
+          "name": "Delete File",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/file-upload/files/{{fileId}}"
+          }
+        },
+        {
+          "name": "Generate Download URL",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/file-upload/files/{{fileId}}/download-url?expiresIn=3600"
+          }
+        },
+        {
+          "name": "Get Workspace File Stats",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/file-upload/workspaces/{{workspaceId}}/stats"
+          }
+        },
+        {
+          "name": "Cleanup Workspace Files",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/file-upload/workspaces/{{workspaceId}}/cleanup"
+          }
+        },
+        {
+          "name": "File Upload Health Check",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/file-upload/health"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agency - Business Managers",
+      "item": [
+        {
+          "name": "Create Parent Business Manager",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"platform\": \"meta\",\n  \"platformBusinessId\": \"business_id_here\",\n  \"name\": \"Humanoid Business Manager\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/business-managers/parent"
+          }
+        },
+        {
+          "name": "Connect Child Business Manager",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"platform\": \"meta\",\n  \"platformBusinessId\": \"child_business_id\",\n  \"parentBusinessManagerId\": \"parent_bm_id\",\n  \"type\": \"child\",\n  \"relationship\": \"owned\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/business-managers/connect"
+          }
+        },
+        {
+          "name": "Get Business Manager by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/business-managers/{{businessManagerId}}"
+          }
+        },
+        {
+          "name": "Get Child Business Managers",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/business-managers/parent/{{parentId}}/children"
+          }
+        },
+        {
+          "name": "Get User Business Managers",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/business-managers/user/me"
+          }
+        },
+        {
+          "name": "Get User or Parent Business Manager",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/business-managers/user/me/or-parent"
+          }
+        },
+        {
+          "name": "Update Business Manager",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"active\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/business-managers/{{businessManagerId}}"
+          }
+        },
+        {
+          "name": "Sync Business Manager",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/business-managers/{{businessManagerId}}/sync"
+          }
+        },
+        {
+          "name": "Delete Business Manager",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/business-managers/{{businessManagerId}}"
+          }
+        },
+        {
+          "name": "Request Business Access",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetBusinessId\": \"target_business_id\",\n  \"parentBusinessManagerId\": \"parent_bm_id\",\n  \"platform\": \"meta\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/business-managers/request-access"
+          }
+        },
+        {
+          "name": "Create System User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessManagerId\": \"bm_id\",\n  \"name\": \"System User\",\n  \"role\": \"admin\",\n  \"platform\": \"meta\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/business-managers/system-users"
+          }
+        },
+        {
+          "name": "Generate System User Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"systemUserId\": \"system_user_id\",\n  \"appId\": \"app_id\",\n  \"scope\": [\"business_management\", \"ads_management\"]\n}"
+            },
+            "url": "{{baseUrl}}/agency/business-managers/system-users/generate-token"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agency - Asset Management",
+      "item": [
+        {
+          "name": "Discover Business Assets",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessManagerId\": \"bm_id\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/assets/discover"
+          }
+        },
+        {
+          "name": "Get Assets",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/assets?workspaceId={{workspaceId}}&assetType=page"
+          }
+        },
+        {
+          "name": "Get Asset by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/assets/{{assetId}}"
+          }
+        },
+        {
+          "name": "Assign Asset to Workspace",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetId\": \"asset_id\",\n  \"workspaceId\": \"workspace_id\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/assets/assign-workspace"
+          }
+        },
+        {
+          "name": "Request Asset Access",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetId\": \"asset_id\",\n  \"targetBusinessManagerId\": \"target_bm_id\",\n  \"permission\": \"manage\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/assets/request-access"
+          }
+        },
+        {
+          "name": "Sync Asset",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetId\": \"asset_id\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/assets/sync"
+          }
+        },
+        {
+          "name": "Delete Asset",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/assets/{{assetId}}"
+          }
+        },
+        {
+          "name": "Create Asset Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessManagerId\": \"bm_id\",\n  \"name\": \"My Asset Group\",\n  \"description\": \"Group description\",\n  \"groupType\": \"pages\",\n  \"assetIds\": [\"asset1\", \"asset2\"],\n  \"syncToPlatform\": true\n}"
+            },
+            "url": "{{baseUrl}}/agency/assets/groups"
+          }
+        },
+        {
+          "name": "Get Asset Groups by Business Manager",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/assets/groups/business-manager/{{businessManagerId}}"
+          }
+        },
+        {
+          "name": "Get Asset Group by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/assets/groups/{{groupId}}"
+          }
+        },
+        {
+          "name": "Add Assets to Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetIds\": [\"asset1\", \"asset2\"]\n}"
+            },
+            "url": "{{baseUrl}}/agency/assets/groups/{{groupId}}/add-assets"
+          }
+        },
+        {
+          "name": "Remove Assets from Group",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assetIds\": [\"asset1\", \"asset2\"]\n}"
+            },
+            "url": "{{baseUrl}}/agency/assets/groups/{{groupId}}/remove-assets"
+          }
+        },
+        {
+          "name": "Delete Asset Group",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/assets/groups/{{groupId}}"
+          }
+        },
+        {
+          "name": "Discover Platform Asset Groups",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/assets/groups/discover/{{businessManagerId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agency - Campaigns",
+      "item": [
+        {
+          "name": "Create Meta Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adAccountId\": \"act_123456789\",\n  \"name\": \"My Meta Campaign\",\n  \"objective\": \"CONVERSIONS\",\n  \"status\": \"PAUSED\",\n  \"dailyBudget\": 100,\n  \"bidStrategy\": \"LOWEST_COST_WITHOUT_CAP\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/campaigns"
+          }
+        },
+        {
+          "name": "Batch Create Campaigns",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adAccountId\": \"act_123456789\",\n  \"campaigns\": [\n    {\n      \"name\": \"Campaign 1\",\n      \"objective\": \"CONVERSIONS\",\n      \"status\": \"PAUSED\"\n    },\n    {\n      \"name\": \"Campaign 2\",\n      \"objective\": \"REACH\",\n      \"status\": \"PAUSED\"\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/agency/campaigns/batch"
+          }
+        },
+        {
+          "name": "Get Campaign by ID",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/campaigns/{{campaignId}}"
+          }
+        },
+        {
+          "name": "Get Campaigns by Ad Account",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/campaigns/ad-account/{{adAccountId}}"
+          }
+        },
+        {
+          "name": "Update Campaign",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Campaign\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/campaigns/{{campaignId}}"
+          }
+        },
+        {
+          "name": "Batch Update Campaign Status",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignIds\": [\"campaign1\", \"campaign2\"],\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/campaigns/batch/update-status"
+          }
+        },
+        {
+          "name": "Sync Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignId\": \"campaign_id\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/campaigns/sync"
+          }
+        },
+        {
+          "name": "Sync Ad Account Campaigns",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adAccountId\": \"act_123456789\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/campaigns/sync/ad-account"
+          }
+        },
+        {
+          "name": "Get Campaign Performance",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/campaigns/{{campaignId}}/performance"
+          }
+        },
+        {
+          "name": "Delete Campaign",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/campaigns/{{campaignId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agency - Insights & Analytics",
+      "item": [
+        {
+          "name": "Fetch Ad Account Insights",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adAccountId\": \"act_123456789\",\n  \"datePreset\": \"last_30_days\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-01-31\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/insights/ad-account/fetch"
+          }
+        },
+        {
+          "name": "Fetch Campaign Insights",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignId\": \"campaign_id\",\n  \"datePreset\": \"last_7_days\",\n  \"breakdowns\": [\"age\", \"gender\"]\n}"
+            },
+            "url": "{{baseUrl}}/agency/insights/campaign/fetch"
+          }
+        },
+        {
+          "name": "Get Workspace Insights",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workspaceId\": \"workspace_id\",\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-01-31\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/insights/workspace"
+          }
+        },
+        {
+          "name": "Get Campaigns Insights",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"campaignIds\": [\"campaign1\", \"campaign2\"],\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-01-31\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/insights/campaigns"
+          }
+        },
+        {
+          "name": "Get Top Performing Campaigns",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workspaceId\": \"workspace_id\",\n  \"metric\": \"spend\",\n  \"limit\": 10,\n  \"startDate\": \"2024-01-01\",\n  \"endDate\": \"2024-01-31\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/insights/top-performing"
+          }
+        },
+        {
+          "name": "Batch Fetch Insights",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adAccountIds\": [\"act_123456789\", \"act_987654321\"],\n  \"datePreset\": \"last_30_days\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/insights/batch/fetch"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agency - Workspace Integration",
+      "item": [
+        {
+          "name": "Onboard Page as Workspace",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageAssetId\": \"page_asset_id\",\n  \"description\": \"Workspace description\",\n  \"autoLinkAssets\": true\n}"
+            },
+            "url": "{{baseUrl}}/agency/workspace-integration/onboard-page"
+          }
+        },
+        {
+          "name": "Batch Onboard Pages",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pageAssetIds\": [\"page1\", \"page2\"],\n  \"autoLinkAssets\": true\n}"
+            },
+            "url": "{{baseUrl}}/agency/workspace-integration/batch-onboard-pages"
+          }
+        },
+        {
+          "name": "Link Ad Account to Workspace",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"adAccountId\": \"act_123456789\",\n  \"workspaceId\": \"workspace_id\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/workspace-integration/link-ad-account"
+          }
+        },
+        {
+          "name": "Auto Link Business Assets",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workspaceId\": \"workspace_id\",\n  \"businessManagerId\": \"bm_id\"\n}"
+            },
+            "url": "{{baseUrl}}/agency/workspace-integration/auto-link-assets"
+          }
+        },
+        {
+          "name": "Get Workspace with Assets",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/workspace-integration/workspace/{{workspaceId}}/assets"
+          }
+        },
+        {
+          "name": "Get Workspace Assets Summary",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/workspace-integration/workspace/{{workspaceId}}/summary"
+          }
+        },
+        {
+          "name": "Sync Workspace Brand Info",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/workspace-integration/workspace/{{workspaceId}}/sync-brand-info"
+          }
+        },
+        {
+          "name": "Unlink Asset from Workspace",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/workspace-integration/asset/{{assetId}}/unlink"
+          }
+        },
+        {
+          "name": "Discover and Onboard Pages",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"businessManagerId\": \"bm_id\",\n  \"autoLinkAssets\": true\n}"
+            },
+            "url": "{{baseUrl}}/agency/workspace-integration/discover-and-onboard"
+          }
+        },
+        {
+          "name": "Get User Workspaces with Assets",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency/workspace-integration/user/workspaces"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Social Ads",
+      "item": [
+        {
+          "name": "Get Platforms",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/platforms"
+          }
+        },
+        {
+          "name": "Get Platform Details",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/platforms/{{platformType}}"
+          }
+        },
+        {
+          "name": "Get Platform Features",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/platforms/{{platformType}}/features"
+          }
+        },
+        {
+          "name": "Get Workspace Accounts",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/accounts"
+          }
+        },
+        {
+          "name": "Get Account Details",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/accounts/{{accountId}}"
+          }
+        },
+        {
+          "name": "Sync Account",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/accounts/{{accountId}}/sync"
+          }
+        },
+        {
+          "name": "Create Social Ad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Social Ad\",\n  \"accountId\": \"account_id\",\n  \"platform\": \"facebook\",\n  \"objective\": \"CONVERSIONS\",\n  \"status\": \"PAUSED\"\n}"
+            },
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads"
+          }
+        },
+        {
+          "name": "Get Workspace Ads",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads?accountId={{accountId}}"
+          }
+        },
+        {
+          "name": "Get Ad Details",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads/{{adId}}"
+          }
+        },
+        {
+          "name": "Update Ad",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Ad\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads/{{adId}}"
+          }
+        },
+        {
+          "name": "Delete Ad",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads/{{adId}}"
+          }
+        },
+        {
+          "name": "Pause Ad",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads/{{adId}}/pause"
+          }
+        },
+        {
+          "name": "Resume Ad",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads/{{adId}}/resume"
+          }
+        },
+        {
+          "name": "Get Ad Performance",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads/{{adId}}/performance?startDate=2024-01-01&endDate=2024-01-31"
+          }
+        },
+        {
+          "name": "Sync Ad Performance",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads/{{adId}}/sync-performance"
+          }
+        },
+        {
+          "name": "Add Creative to Ad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"image\",\n  \"url\": \"https://example.com/image.jpg\",\n  \"title\": \"Creative Title\",\n  \"description\": \"Creative Description\"\n}"
+            },
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads/{{adId}}/creatives"
+          }
+        },
+        {
+          "name": "Get Ad Creatives",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads/{{adId}}/creatives"
+          }
+        },
+        {
+          "name": "Add Targeting to Ad",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ageRange\": {\"min\": 18, \"max\": 65},\n  \"genders\": [\"male\", \"female\"],\n  \"locations\": [\"United States\"],\n  \"interests\": [\"technology\", \"business\"]\n}"
+            },
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads/{{adId}}/targeting"
+          }
+        },
+        {
+          "name": "Get Ad Targeting",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ads/ads/{{adId}}/targeting"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Social Ad Campaigns",
+      "item": [
+        {
+          "name": "Create Social Ad Campaign",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"My Social Campaign\",\n  \"accountId\": \"account_id\",\n  \"platform\": \"facebook\",\n  \"objective\": \"CONVERSIONS\",\n  \"status\": \"PAUSED\",\n  \"budget\": 1000,\n  \"budgetType\": \"daily\"\n}"
+            },
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns"
+          }
+        },
+        {
+          "name": "Get Workspace Campaigns",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns?accountId={{accountId}}"
+          }
+        },
+        {
+          "name": "Get Campaign Details",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns/{{campaignId}}"
+          }
+        },
+        {
+          "name": "Update Campaign",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Campaign\",\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns/{{campaignId}}"
+          }
+        },
+        {
+          "name": "Delete Campaign",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns/{{campaignId}}"
+          }
+        },
+        {
+          "name": "Pause Campaign",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns/{{campaignId}}/pause"
+          }
+        },
+        {
+          "name": "Resume Campaign",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns/{{campaignId}}/resume"
+          }
+        },
+        {
+          "name": "Get Campaign Performance",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns/{{campaignId}}/performance?startDate=2024-01-01&endDate=2024-01-31"
+          }
+        },
+        {
+          "name": "Sync Campaign Performance",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns/{{campaignId}}/sync-performance"
+          }
+        },
+        {
+          "name": "Get Campaign Ads",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns/{{campaignId}}/ads"
+          }
+        },
+        {
+          "name": "Add Ad to Campaign",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns/{{campaignId}}/ads/{{adId}}"
+          }
+        },
+        {
+          "name": "Remove Ad from Campaign",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns/{{campaignId}}/ads/{{adId}}"
+          }
+        },
+        {
+          "name": "Get Campaign Stats",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/workspaces/{{workspaceId}}/social-ad-campaigns/{{campaignId}}/stats"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agency Accounts",
+      "item": [
+        {
+          "name": "Create Agency Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"platformType\": \"facebook\",\n  \"externalAccountId\": \"external_id\",\n  \"accountName\": \"Agency Account\",\n  \"businessManagerId\": \"bm_id\",\n  \"accountType\": \"agency\",\n  \"timezone\": \"UTC\",\n  \"currency\": \"USD\",\n  \"capabilities\": [\"ads_management\", \"business_management\"]\n}"
+            },
+            "url": "{{baseUrl}}/agency-accounts"
+          }
+        },
+        {
+          "name": "Get User Agency Accounts",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts"
+          }
+        },
+        {
+          "name": "Get Agency Account Details",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}"
+          }
+        },
+        {
+          "name": "Update Agency Account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountName\": \"Updated Agency Account\",\n  \"timezone\": \"EST\"\n}"
+            },
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}"
+          }
+        },
+        {
+          "name": "Delete Agency Account",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}"
+          }
+        },
+        {
+          "name": "Initiate Agency Auth",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}/auth/initiate"
+          }
+        },
+        {
+          "name": "Complete Agency Auth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"auth_code\",\n  \"state\": \"auth_state\"\n}"
+            },
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}/auth/complete"
+          }
+        },
+        {
+          "name": "Check Agency Authentication",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}/is-authenticated"
+          }
+        },
+        {
+          "name": "Sync Agency Account",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}/sync"
+          }
+        },
+        {
+          "name": "Link Account to Agency",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}/link/{{socialMediaAccountId}}"
+          }
+        },
+        {
+          "name": "Unlink Account from Agency",
+          "request": {
+            "method": "DELETE",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}/unlink/{{socialMediaAccountId}}"
+          }
+        },
+        {
+          "name": "Get Agency Managed Accounts",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}/managed-accounts"
+          }
+        },
+        {
+          "name": "Get Account Agency",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts/social-account/{{socialMediaAccountId}}/agency"
+          }
+        },
+        {
+          "name": "Get Agency Accessible Pages",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}/accessible-pages"
+          }
+        },
+        {
+          "name": "Get Agency Accessible Ad Accounts",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/agency-accounts/{{agencyAccountId}}/accessible-ad-accounts"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Social Media Authentication",
+      "item": [
+        {
+          "name": "Initiate Social Media Auth",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/social-media-auth/initiate/{{accountId}}"
+          }
+        },
+        {
+          "name": "Complete Social Media Auth",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Content-Type", "value": "application/json"},
+              {"key": "Authorization", "value": "Bearer {{accessToken}}"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"auth_code\",\n  \"state\": \"auth_state\"\n}"
+            },
+            "url": "{{baseUrl}}/social-media-auth/complete/{{accountId}}"
+          }
+        },
+        {
+          "name": "Refresh Auth Token",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/social-media-auth/refresh/{{authId}}"
+          }
+        },
+        {
+          "name": "Revoke Auth Token",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/social-media-auth/revoke/{{authId}}"
+          }
+        },
+        {
+          "name": "Validate Auth Token",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/social-media-auth/validate/{{authId}}"
+          }
+        },
+        {
+          "name": "Get Account Auths",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/social-media-auth/accounts/{{accountId}}/auths"
+          }
+        },
+        {
+          "name": "Get Active Auth",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/social-media-auth/accounts/{{accountId}}/active-auth"
+          }
+        },
+        {
+          "name": "Get Auth Details",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/social-media-auth/auths/{{authId}}"
+          }
+        },
+        {
+          "name": "Get Valid Access Token",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/social-media-auth/accounts/{{accountId}}/access-token"
+          }
+        },
+        {
+          "name": "Check Account Authentication",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/social-media-auth/accounts/{{accountId}}/is-authenticated"
+          }
+        },
+        {
+          "name": "Get Account Permissions",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Authorization", "value": "Bearer {{accessToken}}"}],
+            "url": "{{baseUrl}}/social-media-auth/accounts/{{accountId}}/permissions"
+          }
+        }
+      ]
+    },
+    {
+      "name": "App",
+      "item": [
+        {
+          "name": "Get Hello",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/"
+          }
+        }
+      ]
+    }
+  ]
 }
-

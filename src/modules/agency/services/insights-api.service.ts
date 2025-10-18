@@ -238,7 +238,7 @@ export class InsightsApiService {
     const reportDate = data.date_start ? new Date(data.date_start) : new Date();
 
     // Check if insight already exists
-    let insight = await this.insightDataRepository.findOne({
+    let insight: InsightData | null = await this.insightDataRepository.findOne({
       where: {
         platform: Platform.META,
         insightLevel: level,
@@ -255,7 +255,7 @@ export class InsightsApiService {
       insight.updatedBy = userId;
     } else {
       // Create new
-      insight = this.insightDataRepository.create({
+      const insightData: Partial<InsightData> = {
         platform: Platform.META,
         insightLevel: level,
         platformEntityId,
@@ -272,7 +272,8 @@ export class InsightsApiService {
         rawData: data,
         createdBy: userId,
         updatedBy: userId,
-      });
+      };
+      insight = this.insightDataRepository.create(insightData);
     }
 
     await this.insightDataRepository.save(insight);

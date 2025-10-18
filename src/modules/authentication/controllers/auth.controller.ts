@@ -1,12 +1,17 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { AuthService } from '../services/auth.service';
+import { PasswordResetService } from '../services/password-reset.service';
 import { RegisterDto, LoginDto, AuthResponseDto, RefreshTokenDto } from '../dto/auth.dto';
+import { ForgotPasswordDto, VerifyResetCodeDto, ResetPasswordDto, PasswordResetResponseDto } from '../dto/password-reset.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly passwordResetService: PasswordResetService,
+  ) {}
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
@@ -63,5 +68,33 @@ export class AuthController {
   async logout(@Body() body: { userId: string }): Promise<{ message: string }> {
     await this.authService.logout(body.userId);
     return { message: 'Successfully logged out' };
+  }
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request password reset - send verification code' })
+  @ApiResponse({ status: 200, description: 'Verification code sent to email', type: PasswordResetResponseDto })
+  @ApiResponse({ status: 400, description: 'Invalid email or too many requests' })
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto): Promise<PasswordResetResponseDto> {
+    return this.passwordResetService.requestPasswordReset(forgotPasswordDto);
+  }
+
+  @Post('verify-reset-code')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Verify password reset code' })
+  @ApiResponse({ status: 200, description: 'Verification code is valid', type: PasswordResetResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid or expired verification code' })
+  async verifyResetCode(@Body() verifyResetCodeDto: VerifyResetCodeDto): Promise<PasswordResetResponseDto> {
+    return this.passwordResetService.verifyResetCode(verifyResetCodeDto);
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Reset password with verification code' })
+  @ApiResponse({ status: 200, description: 'Password reset successfully', type: PasswordResetResponseDto })
+  @ApiResponse({ status: 401, description: 'Invalid or expired verification code' })
+  @ApiResponse({ status: 400, description: 'Invalid password format' })
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<PasswordResetResponseDto> {
+    return this.passwordResetService.resetPassword(resetPasswordDto);
   }
 }

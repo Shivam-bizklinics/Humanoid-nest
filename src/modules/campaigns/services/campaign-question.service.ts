@@ -38,7 +38,7 @@ export class CampaignQuestionService {
    */
   async getQuestionById(questionId: string): Promise<CampaignQuestion> {
     const question = await this.campaignQuestionRepository.findOne({
-      where: { id: questionId, isActive: true }
+      where: { id: questionId }
     });
 
     if (!question) {
@@ -81,7 +81,7 @@ export class CampaignQuestionService {
   async getQuestionnaireForCampaign(campaignId: string): Promise<any[]> {
     // Verify campaign exists
     const campaign = await this.campaignRepository.findOne({
-      where: { id: campaignId, isActive: true }
+      where: { id: campaignId }
     });
 
     if (!campaign) {
@@ -93,7 +93,7 @@ export class CampaignQuestionService {
 
     // Get existing responses for this campaign
     const responses = await this.campaignQuestionResponseRepository.find({
-      where: { campaignId, isActive: true },
+      where: { campaignId },
       relations: ['question']
     });
 
@@ -130,7 +130,7 @@ export class CampaignQuestionService {
   ): Promise<{ success: boolean; message: string }> {
     // Verify campaign exists
     const campaign = await this.campaignRepository.findOne({
-      where: { id: campaignId, isActive: true }
+      where: { id: campaignId }
     });
 
     if (!campaign) {
@@ -144,7 +144,7 @@ export class CampaignQuestionService {
       
       // Check if response already exists
       const existingResponse = await this.campaignQuestionResponseRepository.findOne({
-        where: { campaignId, questionId: responseData.questionId, isActive: true }
+        where: { campaignId, questionId: responseData.questionId }
       });
 
       if (existingResponse) {
@@ -184,7 +184,7 @@ export class CampaignQuestionService {
   ): Promise<CampaignQuestionResponse> {
     // Check if response exists
     const existingResponse = await this.campaignQuestionResponseRepository.findOne({
-      where: { campaignId, questionId, isActive: true }
+      where: { campaignId, questionId }
     });
 
     if (existingResponse) {
@@ -230,7 +230,7 @@ export class CampaignQuestionService {
     
     // Get existing responses
     const responses = await this.campaignQuestionResponseRepository.find({
-      where: { campaignId, isActive: true }
+      where: { campaignId }
     });
 
     const responseMap = new Map();
@@ -284,7 +284,7 @@ export class CampaignQuestionService {
    */
   async getCampaignResponses(campaignId: string): Promise<CampaignQuestionResponse[]> {
     return this.campaignQuestionResponseRepository.find({
-      where: { campaignId, isActive: true },
+      where: { campaignId },
       relations: ['question'],
       order: { createdAt: 'DESC' }
     });

@@ -82,9 +82,9 @@ export class WorkspaceService {
     const resources = Object.values(Resource);
     const actions = Object.values(Action);
 
-    const permissionPromises = [];
+    // Collect all valid permission combinations
+    const permissionCombinations: { resource: Resource; action: Action }[] = [];
 
-    // Assign all combinations of resource and action
     for (const resource of resources) {
       for (const action of actions) {
         // Skip invalid combinations (e.g., UPLOAD for non-designer resources)
@@ -92,18 +92,16 @@ export class WorkspaceService {
           continue;
         }
 
-        permissionPromises.push(
-          this.userWorkspacePermissionService.assignPermission({
-            userId,
-            workspaceId,
-            resource,
-            action,
-          }, userId), // Use userId as assignedById since they're assigning to themselves
-        );
+        permissionCombinations.push({ resource, action });
       }
     }
 
-    await Promise.all(permissionPromises);
+    // Assign all permissions in a single operation
+    await this.userWorkspacePermissionService.assignMultiplePermissions({
+      userId,
+      workspaceId,
+      permissions: permissionCombinations,
+    }, userId); // Use userId as assignedById since they're assigning to themselves
   }
 
   async getWorkspaceById(id: string): Promise<Workspace | null> {

@@ -28,7 +28,7 @@ import {
 @Entity('business_managers')
 @Index(['platform', 'platformBusinessId'], { unique: true })
 @Index(['parentBusinessManagerId'])
-@Index(['workspaceId'])
+@Index(['userId'])
 @Index(['status'])
 export class BusinessManager implements BaseEntity {
   @PrimaryGeneratedColumn('uuid')

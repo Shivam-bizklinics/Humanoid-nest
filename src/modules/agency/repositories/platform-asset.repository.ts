@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { PlatformAsset } from '../entities';
+import { AssetType } from '../enums';
 
 @Injectable()
 export class PlatformAssetRepository extends Repository<PlatformAsset> {
@@ -45,7 +46,7 @@ export class PlatformAssetRepository extends Repository<PlatformAsset> {
     return this.find({
       where: {
         workspaceId,
-        assetType: 'ad_account',
+        assetType: AssetType.AD_ACCOUNT,
       },
       order: { createdAt: 'DESC' },
     });

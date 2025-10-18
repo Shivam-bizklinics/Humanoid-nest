@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsOptional, IsEnum, IsUUID } from 'class-validator';
-import { ContentPillarType, SystemContentPillar } from '../../../shared/enums/campaign.enum';
+import { SystemContentPillar } from '../../../shared/enums/campaign.enum';
 
 export class CreateContentPillarDto {
   @ApiProperty({ description: 'Content pillar name' })
@@ -14,8 +14,8 @@ export class CreateContentPillarDto {
 
   @ApiPropertyOptional({ description: 'Content pillar type' })
   @IsOptional()
-  @IsEnum(ContentPillarType)
-  type?: ContentPillarType;
+  @IsEnum(SystemContentPillar)
+  type?: SystemContentPillar;
 
   @ApiPropertyOptional({ description: 'System content pillar (if type is SYSTEM)' })
   @IsOptional()
@@ -40,8 +40,8 @@ export class UpdateContentPillarDto {
 
   @ApiPropertyOptional({ description: 'Content pillar type' })
   @IsOptional()
-  @IsEnum(ContentPillarType)
-  type?: ContentPillarType;
+  @IsEnum(SystemContentPillar)
+  type?: SystemContentPillar;
 
   @ApiPropertyOptional({ description: 'System content pillar (if type is SYSTEM)' })
   @IsOptional()
@@ -60,7 +60,7 @@ export class ContentPillarResponseDto {
   description?: string;
 
   @ApiProperty({ description: 'Content pillar type' })
-  type: ContentPillarType;
+  type: SystemContentPillar;
 
   @ApiPropertyOptional({ description: 'System content pillar' })
   systemPillar?: SystemContentPillar;

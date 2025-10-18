@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Workspace } from '../../workspaces/entities/workspace.entity';
+import { Workspace, WorkspaceSetupStatus } from '../../workspaces/entities/workspace.entity';
 import { PlatformAsset, BusinessManager } from '../entities';
 import { AssetType, Platform, AssetStatus } from '../enums';
 import { BusinessException } from '../../../shared/exceptions/business.exception';
@@ -72,7 +72,7 @@ export class WorkspaceIntegrationService {
       brandDescription: pageAsset.description || null,
       brandLogo: pageAsset.platformConfig?.pictureUrl || null,
       ownerId: userId,
-      setupStatus: 'completed',
+      setupStatus: WorkspaceSetupStatus.COMPLETED,
       isActive: true,
       createdBy: userId,
       updatedBy: userId,
@@ -84,11 +84,7 @@ export class WorkspaceIntegrationService {
     pageAsset.workspaceId = workspace.id;
     await this.platformAssetRepository.save(pageAsset);
 
-    // Link business manager to workspace if not already linked
-    if (!pageAsset.businessManager.workspaceId) {
-      pageAsset.businessManager.workspaceId = workspace.id;
-      await this.businessManagerRepository.save(pageAsset.businessManager);
-    }
+    // Business manager is already linked to the user, no need to link to workspace
 
     // Auto-link related assets if requested
     if (options?.autoLinkAssets) {

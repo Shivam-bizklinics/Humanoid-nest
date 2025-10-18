@@ -74,30 +74,37 @@ export class UserWorkspacePermissionService {
       throw new NotFoundException('Permission not found');
     }
 
-    // Check if permission already exists
-    const existingPermission = await this.userWorkspacePermissionRepository.findOne({
+    // Check if user-workspace record exists
+    let existingRecord = await this.userWorkspacePermissionRepository.findOne({
       where: {
         userId: assignDto.userId,
         workspaceId: assignDto.workspaceId,
-        permissionId: permission.id,
         isActive: true,
       },
     });
 
-    if (existingPermission) {
-      throw new ForbiddenException('User already has this permission for this workspace');
+    if (existingRecord) {
+      // Check if permission already exists in the array
+      if (existingRecord.permissionIds.includes(permission.id)) {
+        throw new ForbiddenException('User already has this permission for this workspace');
+      }
+
+      // Add permission to existing array
+      existingRecord.permissionIds.push(permission.id);
+      existingRecord.updatedBy = assignedById;
+      return this.userWorkspacePermissionRepository.save(existingRecord);
+    } else {
+      // Create new record with permission in array
+      const userWorkspacePermission = this.userWorkspacePermissionRepository.create({
+        userId: assignDto.userId,
+        workspaceId: assignDto.workspaceId,
+        permissionIds: [permission.id],
+        createdBy: assignedById,
+        updatedBy: assignedById,
+      });
+
+      return this.userWorkspacePermissionRepository.save(userWorkspacePermission);
     }
-
-    // Create the permission assignment
-    const userWorkspacePermission = this.userWorkspacePermissionRepository.create({
-      userId: assignDto.userId,
-      workspaceId: assignDto.workspaceId,
-      permissionId: permission.id,
-      createdBy: assignedById,
-      updatedBy: assignedById,
-    });
-
-    return this.userWorkspacePermissionRepository.save(userWorkspacePermission);
   }
 
   /**
@@ -106,30 +113,74 @@ export class UserWorkspacePermissionService {
   async assignMultiplePermissions(
     assignDto: UserWorkspacePermissionsDto,
     assignedById: string,
-  ): Promise<UserWorkspacePermission[]> {
-    const results: UserWorkspacePermission[] = [];
+  ): Promise<UserWorkspacePermission> {
+    // Check if user has permission to assign permissions (Super Admin only)
+    const hasPermission = await this.checkUserCanAssignPermissions(assignedById);
+    if (!hasPermission) {
+      throw new ForbiddenException('Only Super Admins can assign permissions');
+    }
 
+    // Validate user exists
+    const user = await this.userRepository.findOne({ where: { id: assignDto.userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Validate workspace exists
+    const workspace = await this.workspaceRepository.findOne({ where: { id: assignDto.workspaceId } });
+    if (!workspace) {
+      throw new NotFoundException('Workspace not found');
+    }
+
+    // Get all permission IDs
+    const permissionIds: string[] = [];
     for (const permData of assignDto.permissions) {
-      const assignPermissionDto: AssignPermissionDto = {
-        userId: assignDto.userId,
-        workspaceId: assignDto.workspaceId,
-        resource: permData.resource,
-        action: permData.action,
-      };
+      const permission = await this.permissionRepository.findOne({
+        where: {
+          resource: permData.resource,
+          action: permData.action,
+        },
+      });
 
-      try {
-        const result = await this.assignPermission(assignPermissionDto, assignedById);
-        results.push(result);
-      } catch (error) {
-        // Skip if permission already exists, continue with others
-        if (error instanceof ForbiddenException && error.message.includes('already has this permission')) {
-          continue;
-        }
-        throw error;
+      if (permission) {
+        permissionIds.push(permission.id);
       }
     }
 
-    return results;
+    if (permissionIds.length === 0) {
+      throw new NotFoundException('No valid permissions found');
+    }
+
+    // Check if user-workspace record exists
+    let existingRecord = await this.userWorkspacePermissionRepository.findOne({
+      where: {
+        userId: assignDto.userId,
+        workspaceId: assignDto.workspaceId,
+        isActive: true,
+      },
+    });
+
+    if (existingRecord) {
+      // Add new permissions to existing array (avoid duplicates)
+      const newPermissionIds = permissionIds.filter(id => !existingRecord.permissionIds.includes(id));
+      if (newPermissionIds.length > 0) {
+        existingRecord.permissionIds.push(...newPermissionIds);
+        existingRecord.updatedBy = assignedById;
+        return this.userWorkspacePermissionRepository.save(existingRecord);
+      }
+      return existingRecord;
+    } else {
+      // Create new record with all permissions in array
+      const userWorkspacePermission = this.userWorkspacePermissionRepository.create({
+        userId: assignDto.userId,
+        workspaceId: assignDto.workspaceId,
+        permissionIds: permissionIds,
+        createdBy: assignedById,
+        updatedBy: assignedById,
+      });
+
+      return this.userWorkspacePermissionRepository.save(userWorkspacePermission);
+    }
   }
 
   /**
@@ -149,17 +200,34 @@ export class UserWorkspacePermissionService {
       return false;
     }
 
-    const result = await this.userWorkspacePermissionRepository.update(
-      {
+    // Find the user-workspace record
+    const userWorkspacePermission = await this.userWorkspacePermissionRepository.findOne({
+      where: {
         userId,
         workspaceId,
-        permissionId: permission.id,
         isActive: true,
       },
-      { isActive: false }
-    );
+    });
 
-    return result.affected > 0;
+    if (!userWorkspacePermission) {
+      return false;
+    }
+
+    // Remove permission from array
+    const permissionIndex = userWorkspacePermission.permissionIds.indexOf(permission.id);
+    if (permissionIndex === -1) {
+      return false; // Permission not found in array
+    }
+
+    userWorkspacePermission.permissionIds.splice(permissionIndex, 1);
+
+    // If no permissions left, soft delete the record
+    if (userWorkspacePermission.permissionIds.length === 0) {
+      userWorkspacePermission.isActive = false;
+    }
+
+    await this.userWorkspacePermissionRepository.save(userWorkspacePermission);
+    return true;
   }
 
   /**
@@ -188,14 +256,28 @@ export class UserWorkspacePermissionService {
     userId: string,
     workspaceId: string,
   ): Promise<UserWorkspacePermission[]> {
-    return this.userWorkspacePermissionRepository.find({
+    const userWorkspacePermission = await this.userWorkspacePermissionRepository.findOne({
       where: {
         userId,
         workspaceId,
         isActive: true,
       },
-      relations: ['permission', 'workspace', 'user'],
+      relations: ['workspace', 'user'],
     });
+
+    if (!userWorkspacePermission) {
+      return [];
+    }
+
+    // Get permission details for each permission ID
+    const permissions = await this.permissionRepository.findByIds(userWorkspacePermission.permissionIds);
+    
+    // Create individual permission records for backward compatibility
+    return permissions.map(permission => ({
+      ...userWorkspacePermission,
+      permissionIds: [permission.id], // Single permission for each record
+      permission,
+    } as UserWorkspacePermission));
   }
 
   /**
@@ -207,29 +289,32 @@ export class UserWorkspacePermissionService {
   }[]> {
     const userPermissions = await this.userWorkspacePermissionRepository.find({
       where: { userId, isActive: true },
-      relations: ['permission', 'workspace'],
+      relations: ['workspace'],
     });
 
-    // Group by workspace
-    const workspaceMap = new Map<string, {
+    const result: {
       workspace: Workspace;
       permissions: UserWorkspacePermission[];
-    }>();
+    }[] = [];
 
-    for (const permission of userPermissions) {
-      const workspaceId = permission.workspaceId;
+    for (const userPermission of userPermissions) {
+      // Get permission details for each permission ID
+      const permissions = await this.permissionRepository.findByIds(userPermission.permissionIds);
       
-      if (!workspaceMap.has(workspaceId)) {
-        workspaceMap.set(workspaceId, {
-          workspace: permission.workspace,
-          permissions: [],
-        });
-      }
+      // Create individual permission records for backward compatibility
+      const permissionRecords = permissions.map(permission => ({
+        ...userPermission,
+        permissionIds: [permission.id], // Single permission for each record
+        permission,
+      } as UserWorkspacePermission));
 
-      workspaceMap.get(workspaceId)!.permissions.push(permission);
+      result.push({
+        workspace: userPermission.workspace,
+        permissions: permissionRecords,
+      });
     }
 
-    return Array.from(workspaceMap.values());
+    return result;
   }
 
   /**
@@ -249,16 +334,20 @@ export class UserWorkspacePermissionService {
       return false;
     }
 
-    const userPermission = await this.userWorkspacePermissionRepository.findOne({
+    const userWorkspacePermission = await this.userWorkspacePermissionRepository.findOne({
       where: {
         userId,
         workspaceId,
-        permissionId: permission.id,
         isActive: true,
       },
     });
 
-    return !!userPermission;
+    if (!userWorkspacePermission) {
+      return false;
+    }
+
+    // Check if permission ID exists in the array
+    return userWorkspacePermission.permissionIds.includes(permission.id);
   }
 
   /**
@@ -285,29 +374,32 @@ export class UserWorkspacePermissionService {
   }[]> {
     const workspacePermissions = await this.userWorkspacePermissionRepository.find({
       where: { workspaceId, isActive: true },
-      relations: ['permission', 'user'],
+      relations: ['user'],
     });
 
-    // Group by user
-    const userMap = new Map<string, {
+    const result: {
       user: User;
       permissions: UserWorkspacePermission[];
-    }>();
+    }[] = [];
 
-    for (const permission of workspacePermissions) {
-      const userId = permission.userId;
+    for (const userPermission of workspacePermissions) {
+      // Get permission details for each permission ID
+      const permissions = await this.permissionRepository.findByIds(userPermission.permissionIds);
       
-      if (!userMap.has(userId)) {
-        userMap.set(userId, {
-          user: permission.user,
-          permissions: [],
-        });
-      }
+      // Create individual permission records for backward compatibility
+      const permissionRecords = permissions.map(permission => ({
+        ...userPermission,
+        permissionIds: [permission.id], // Single permission for each record
+        permission,
+      } as UserWorkspacePermission));
 
-      userMap.get(userId)!.permissions.push(permission);
+      result.push({
+        user: userPermission.user,
+        permissions: permissionRecords,
+      });
     }
 
-    return Array.from(userMap.values());
+    return result;
   }
 
   /**
@@ -334,19 +426,28 @@ export class UserWorkspacePermissionService {
     resource: string,
     action: string,
   ): Promise<boolean> {
-    const permission = await this.userWorkspacePermissionRepository.findOne({
+    // Get the permission first
+    const permission = await this.permissionRepository.findOne({
+      where: {
+        name: `${resource}.${action}`,
+        isActive: true,
+      },
+    });
+
+    if (!permission) {
+      return false;
+    }
+
+    // Check if user has this permission in any workspace
+    const userPermissions = await this.userWorkspacePermissionRepository.find({
       where: {
         userId,
         isActive: true,
-        permission: {
-          name: `${resource}.${action}`,
-          isActive: true,
-        },
       },
-      relations: ['permission'],
     });
 
-    return !!permission;
+    // Check if any workspace has this permission in the array
+    return userPermissions.some(up => up.permissionIds.includes(permission.id));
   }
 
   /**
@@ -369,8 +470,8 @@ export class UserWorkspacePermissionService {
         permissions: userPerm.permissions,
       };
 
-      const userResults = await this.assignMultiplePermissions(assignDto, assignedById);
-      results.push(...userResults);
+      const userResult = await this.assignMultiplePermissions(assignDto, assignedById);
+      results.push(userResult);
     }
 
     return results;

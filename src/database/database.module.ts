@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User } from '../modules/authentication/entities/user.entity';
+import { PasswordReset } from '../modules/authentication/entities/password-reset.entity';
 import { Permission } from '../modules/rbac/entities/permission.entity';
 import { UserWorkspace } from '../modules/rbac/entities/user-workspace.entity';
 import { UserWorkspacePermission } from '../modules/rbac/entities/user-workspace-permission.entity';
@@ -42,6 +43,7 @@ import { FileUpload } from '../modules/file-upload/entities/file-upload.entity';
         database: configService.get('DB_NAME'),
                 entities: [
                   User,
+                  PasswordReset,
                   Permission,
                   UserWorkspace,
                   UserWorkspacePermission,

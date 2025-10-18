@@ -33,7 +33,7 @@ export class AuthService implements IAuthService {
   }
 
   async login(loginDto: LoginDto): Promise<{ user: User; tokens: { accessToken: string; refreshToken: string } }> {
-    const user = await this.validateUser(loginDto.username, loginDto.password);
+    const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }

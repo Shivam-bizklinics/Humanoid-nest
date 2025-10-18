@@ -42,14 +42,14 @@ export class UserWorkspacePermissionController {
     @Body() assignDto: UserWorkspacePermissionsDto,
     @CurrentUserId() userId: string,
   ) {
-    const userWorkspacePermissions = await this.userWorkspacePermissionService.assignMultiplePermissions(
+    const userWorkspacePermission = await this.userWorkspacePermissionService.assignMultiplePermissions(
       assignDto,
       userId
     );
 
     return {
       success: true,
-      data: userWorkspacePermissions,
+      data: userWorkspacePermission,
       message: 'Permissions assigned successfully'
     };
   }

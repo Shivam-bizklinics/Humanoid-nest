@@ -24,11 +24,11 @@ export class BusinessManagerRepository extends Repository<BusinessManager> {
   }
 
   /**
-   * Find business managers by workspace
+   * Find business managers by user
    */
-  async findByWorkspace(workspaceId: string): Promise<BusinessManager[]> {
+  async findByUser(userId: string): Promise<BusinessManager[]> {
     return this.find({
-      where: { workspaceId },
+      where: { userId },
       relations: ['parentBusinessManager'],
       order: { createdAt: 'DESC' },
     });

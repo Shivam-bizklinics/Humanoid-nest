@@ -37,7 +37,7 @@ export class CampaignService {
     availableSystemPillars: SystemContentPillar[];
   }> {
     const campaign = await this.campaignRepository.findOne({
-      where: { id: campaignId, isActive: true }
+      where: { id: campaignId }
     });
 
     if (!campaign) {
@@ -74,7 +74,7 @@ export class CampaignService {
    */
   async getCampaignById(campaignId: string): Promise<Campaign> {
     const campaign = await this.campaignRepository.findOne({
-      where: { id: campaignId, isActive: true }
+      where: { id: campaignId }
     });
 
     if (!campaign) {
@@ -89,7 +89,7 @@ export class CampaignService {
    */
   async getWorkspaceCampaigns(workspaceId: string): Promise<Campaign[]> {
     return this.campaignRepository.find({
-      where: { workspaceId, isActive: true },
+      where: { workspaceId },
       order: { createdAt: 'DESC' }
     });
   }
